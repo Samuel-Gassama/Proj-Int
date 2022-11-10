@@ -5,7 +5,7 @@
     @version 1.1 21/09/20 
 */
 #include <Arduino.h>
-#include "MyOledView.h"
+#include "MyOled/MyOledView.h"
 using namespace std;
 
 void MyOledView::setParams(string tag, string value){

@@ -1,19 +1,17 @@
 <!DOCTYPE html>
 <html>
- 
 <head>
    
 <link rel="stylesheet" href="style.css" type="text/css">
 
 </head>
 
-<body>
+<body onload = "getInfoWood()">
     <img alt="image" src="sac.png" width="300" height="200">
 
 <h1> Type de Bois</h1>
 
-<SELECT id="typeBois-Select" name = "typeBois" onchange="getAllWood();" size="1" class="choix">
-</SELECT>
+<SELECT id="typeBois_ListBox_Select" onchange="getInfoWood();" size="1" class="choix"></SELECT>
 
 <h1>Caracteristiques</h1>
 
@@ -58,13 +56,10 @@
 </div>
 </body>
 
-<script type = "text/javascript" src="script.js">
-
+<script type = "text/javascript" src="script.js"> </script>
+<script>
     getFromESP_getAllWoodOptions();
     getInfoWood();
-    demarrageFour();
-    getFromEsp_TemperatureSensor();
-    getAllWood();
 
 </script>
 

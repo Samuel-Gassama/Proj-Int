@@ -58,7 +58,8 @@ void MyServer::initAllRoutes() {
     //     });
 
         // Route fonction pour lire la mesure de la température du senseur 
-        this->on("/getTemperatureSensor", HTTP_GET, [](AsyncWebServerRequest *request) {
+
+       this->on("/getTemperatureSensor", HTTP_GET, [](AsyncWebServerRequest *request) {
         std::string repString = "";
         if (ptrToCallBackFunction) repString = (*ptrToCallBackFunction)("temperature");
         String temp = String(repString.c_str());
@@ -69,9 +70,8 @@ void MyServer::initAllRoutes() {
 
         this->on("/getAllWoodOptions", HTTP_GET, [](AsyncWebServerRequest *request) {
         Serial.println("getAllWoodOptions... ");
-
         HTTPClient http;
-        String woodApiRestAddress = "http://api.qc-ca.ovh:2223/bois?limit=10&key=IlBv28V1NT81IvZWXVP126IZ6hJ5xd9fxIMP4gzIbvacr"; // ADRESSE DE L'API
+        String woodApiRestAddress = "http://api.qc-ca.ovh:2223/api/woods/getAllWoods/"; // ADRESSE DE L'API
         http.begin(woodApiRestAddress);
         http.GET();
         String response = http.getString();
