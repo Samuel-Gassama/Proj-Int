@@ -22,7 +22,7 @@ function getInfoWood(){
 
  var xhttp = new XMLHttpRequest();
  xhttp.onreadystatechange = function () {
-     if (this.readyState == 4 && this.status == 200) {
+     if (this.readyState == 4 && this.status == 200 && this.arrayOfStrings.results.length != undefined) {
          var arrayOfStrings = JSON.parse(this.responseText);
          for (i = 0; i < arrayOfStrings.results.length; i++) {
              if(x.value == arrayOfStrings.results[i].id){
@@ -44,24 +44,25 @@ xhttp.send();
 }
 
 function demarrageFour(){
- var i = 0;
- var temp = parseInt(temperature);
- if( temp >= boisChoisi.tempMin) {
-    var timer = setInterval(function(){
-         i++
-         document.getElementById("timer").innerHTML = i;
-         console.log(i);
-         if(i == boisChoisi.tempsSechage){
-             clearInterval(timer);
-         }
-         
-     }, 1000);
- } else {
-     console.log('non');
- }
- 
+    document.getElementById("four").addEventListener("click", function(){
+        var i = 0;
+        var temp = parseInt(temperature);
+        if( temp >= boisChoisi.tempMin) {
+           var timer = setInterval(function(){
+                i++
+                document.getElementById("timer").innerHTML = i;
+                console.log(i);
+                if(i == boisChoisi.drying){
+                    clearInterval(timer);
+                }
+                
+            }, 1000);
+        } else {
+            console.log('non');
+        }
+        
+    });
 }
-
 
 function getFromESP_getAllWoodOptions() {
  var xhttp = new XMLHttpRequest();
@@ -108,6 +109,23 @@ setInterval(function getFromEsp_TemperatureSensor(){
  
  }, 3000);
 
+const apiUrl = "http://api.qc-ca.ovh:2223/api/woods/getAllWoods/";
 
+ function getWood() {
+   fetch(apiUrl, {
+       method: "get"
+     })
+     .then(response => response.json())
+     .then(data => {
+       let allWood = data.result.bois;
+       let html = '';
+       for (var i = 0; i < allWood.length; i++) {
+         html += "<option value=" + allWood[i].id + ">" + allWood[i].nom + "</option>"
+         console.log('get Wood running');
+       }
+       document.getElementById("typeBois_ListBox_Select").innerHTML = html;
+     })
+ }
+ getWood();
 
 
