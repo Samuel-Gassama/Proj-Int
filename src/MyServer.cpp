@@ -6,7 +6,9 @@
 */
 #include <Arduino.h>
 #include "MyServer.h"
+#include "ArduinoJson.h"
 using namespace std;
+
 
 typedef std::string (*CallbackType)(std::string);
 CallbackType MyServer::ptrToCallBackFunction = NULL;
@@ -68,18 +70,86 @@ void MyServer::initAllRoutes() {
 
         // Route fonction pour récupérer l'API des bois
 
-        this->on("/getAllWoodOptions", HTTP_GET, [](AsyncWebServerRequest *request) {
-        Serial.println("getAllWoodOptions... ");
-        HTTPClient http;
-        String woodApiRestAddress = "http://api.qc-ca.ovh:2223/api/woods/getAllWoods/"; // ADRESSE DE L'API
-        http.begin(woodApiRestAddress);
-        http.GET();
-        String response = http.getString();
-        Serial.println(response);
-        request->send(200, "text/plain", response);
-        
+        this->on("/getAllWoodOptions", HTTP_GET, [](AsyncWebServerRequest *request)
+        {
+            if (ptrToCallBackFunction) (*ptrToCallBackFunction)("button getAllWoodOptions");
+            HTTPClient http;     
+            String serverTo = "http://api.qc-ca.ovh:2223/api/woods/getAllWoods/"; //adresse du serveur WEB
+            bool httpInitResult = http.begin(serverTo);
+
+            if (httpInitResult == false)
+            {
+                Serial.println("Erreur de connection au serveur");
+            }
+            http.addHeader("Authorization", "Bearer 2e550451f21d19dc726b54e574d6d6b76665ade19f703af2a26384cf2d3adf9a8e9a5e28270471fa2a6a3c1982aafa2be5ff14179cbfbf299a189846dfc45101");
+            
+            int httpCode = http.GET();
+            Serial.println("httpCode: " + String(httpCode));
+            if (httpCode > 0)
+            {
+                if (httpCode == HTTP_CODE_OK)
+                {
+                    String infoBois;
+                    String payload = http.getString();
+                    Serial.println(payload);
+                    StaticJsonDocument<2048> doc;
+                    deserializeJson(doc, payload);
+                    JsonObject elem = doc.as<JsonObject>();
+                    String results = elem["results"].as<String>();
+
+                    Serial.println("Payload: " + payload);
+                    request->send(200, "text/plain", payload);
+                }
+            }
+            else
+            {
+                request->send(401, "text/plain", "Erreur de connection au serveur");
+            }
+            
+            http.end(); 
     });
     
+    this->on("/getWoodCaracteristiques", HTTP_GET, [](AsyncWebServerRequest *request)
+        {
+            if (ptrToCallBackFunction) (*ptrToCallBackFunction)("button getWoodCaracteristiques");
+            AsyncWebParameter* p = request->getParam("nomBois");
+            HTTPClient http;     
+            String serverTo = "http://api.qc-ca.ovh:2223/api/woods/getWood/" + p->value(); //adresse du serveur WEB
+            Serial.println(serverTo);
+
+            bool httpInitResult = http.begin(serverTo);
+
+            if (httpInitResult == false)
+            {
+                Serial.println("Erreur de connection au serveur");
+            }
+            http.addHeader("Authorization", "Bearer 2e550451f21d19dc726b54e574d6d6b76665ade19f703af2a26384cf2d3adf9a8e9a5e28270471fa2a6a3c1982aafa2be5ff14179cbfbf299a189846dfc45101");
+            
+            int httpCode = http.GET();
+            Serial.println("httpCode: " + String(httpCode));
+            if (httpCode > 0)
+            {
+                if (httpCode == HTTP_CODE_OK)
+                {
+                    String infoBois;
+                    String payload = http.getString();
+                    Serial.println(payload);
+                    StaticJsonDocument<2048> doc;
+                    deserializeJson(doc, payload);
+                    JsonObject elem = doc.as<JsonObject>();
+                    String results = elem["results"].as<String>();
+
+                    Serial.println("Payload: " + payload);
+                    request->send(200, "text/plain", payload);
+                }
+            }
+            else
+            {
+                request->send(401, "text/plain", "Erreur de connection au serveur");
+            }
+            
+            http.end(); 
+    });
 
     // Route fonction pour récupérer le nom du du FOUR
 
