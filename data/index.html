@@ -13,6 +13,7 @@
 <h1> Type de Bois</h1>
 
 <SELECT id="typeBois_ListBox_Select" onchange="getFromESP_getWoodCaracteristique()" size="1" class="choix">
+    <!-- <option selected="selected">Choisir le bois</option> -->
 </SELECT>
 
 <h1>Caracteristiques</h1>
@@ -25,9 +26,9 @@
 <br>
     Origine : <span id="origine"></span>
 <br> 
-    Temps de sechage : <span id="temps"></span>  
+    Temps de sechage : <span id="temps"></span> secondes 
 <br> 
-    Temperature de sechage : <span id="sechage"></span>
+    Temperature de sechage : <span id="sechage"></span> celsius
 </h2>
 </div>
 <h3> Controle du four de sechage </h3>
@@ -41,7 +42,7 @@
     <br>
     <p class="celcius" id="temp">Temperature</p>
     <br>
-    <button id="four" onclick="demarrageFour();" class="box">Demarrage du four</button>
+    <button id="four" onclick="demarrageFour()" class="box">Demarrage du four</button>
     </div>
     <div class="ligne">
         <p class="bleu"><span id="nom2"></span></p>
