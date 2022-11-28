@@ -1,14 +1,13 @@
 /**
     Gestion d'un serveur WEB
     @file MyServer.cpp
-    @author Alain Dubé
-    @version 1.1 20/11/20 
+    @author David Tremblay
+    @version 1.1 17/11/2022
 */
 #include <Arduino.h>
 #include "MyServer.h"
 #include "ArduinoJson.h"
 using namespace std;
-
 
 typedef std::string (*CallbackType)(std::string);
 CallbackType MyServer::ptrToCallBackFunction = NULL;
@@ -17,9 +16,9 @@ CallbackType MyServer::ptrToCallBackFunction = NULL;
 //if (ptrToCallBackFunction) (*ptrToCallBackFunction)(stringToSend); 
 void MyServer::initCallback(CallbackType callback) {
     ptrToCallBackFunction = callback;
-    }
+}
 
-void MyServer::initAllRoutes() { 
+void MyServer::initAllRoutes() {
     currentTemperature = 3.3f;
 
     //Initialisation du SPIFF.
@@ -37,8 +36,8 @@ void MyServer::initAllRoutes() {
     this->on("/script.js", HTTP_GET, [](AsyncWebServerRequest *request) {
         request->send(SPIFFS, "/script.js", "text/javascript");
         });
-    // Route du style css pour l'index.html
 
+    // Route du style css pour l'index.html
     this->on("/style.css", HTTP_GET, [](AsyncWebServerRequest *request) {
         request->send(SPIFFS, "/style.css", "text/css");
         });
@@ -49,19 +48,18 @@ void MyServer::initAllRoutes() {
         request->send(SPIFFS, "/sac.png", "");
         });
    
-    // Route pour tester le bouton callback 
+    // Route pour tester le bouton callback
 
-    // this->on("/button", HTTP_GET, [](AsyncWebServerRequest *request) { // ADDED ROUTE FOR CALLBACK
-    //     std::string repString = "";
-    //     Serial.println("button");
-    //      if (ptrToCallBackFunction) repString = (ptrToCallBackFunction)("button Test"); //Exemple pour appeler une fonction CallBack
-    //      String button = String(repString.c_str());
-    //     request->send(200, "text/plain", button);
-    //     });
+    this->on("/button", HTTP_GET, [](AsyncWebServerRequest *request) { // ADDED ROUTE FOR CALLBACK
+        std::string repString = "";
+        Serial.println("button");
+         if (ptrToCallBackFunction) repString = (ptrToCallBackFunction)("button Test"); //Exemple pour appeler une fonction CallBack
+         String button = String(repString.c_str());
+        request->send(200, "text/plain", button);
+        });
 
         // Route fonction pour lire la mesure de la température du senseur 
-
-       this->on("/getTemperatureSensor", HTTP_GET, [](AsyncWebServerRequest *request) {
+        this->on("/getTemperatureSensor", HTTP_GET, [](AsyncWebServerRequest *request) {
         std::string repString = "";
         if (ptrToCallBackFunction) repString = (*ptrToCallBackFunction)("temperature");
         String temp = String(repString.c_str());
@@ -108,51 +106,81 @@ void MyServer::initAllRoutes() {
             
             http.end(); 
     });
-    
-    this->on("/getWoodCaracteristiques", HTTP_GET, [](AsyncWebServerRequest *request)
+
+    this->on("/getWoodCaracteristiques", HTTP_POST, [](AsyncWebServerRequest *request)
+    {
+        Serial.println("getWoodCaracteristiques...");
+        String wood;
+
+        if (request->hasParam("wood", true))
         {
-            if (ptrToCallBackFunction) (*ptrToCallBackFunction)("button getWoodCaracteristiques");
-            AsyncWebParameter* p = request->getParam("nomBois");
-            HTTPClient http;     
-            String serverTo = "http://api.qc-ca.ovh:2223/api/woods/getWood/" + p->value(); //adresse du serveur WEB
-            Serial.println(serverTo);
+            wood = request->getParam("wood", true)->value();
+            Serial.println("wood1: " + wood);
+        }
+        else
+        {
+            Serial.println("Erreur de parametre");
+        }
+        
+        HTTPClient http;
+        String woodApiRestAddress = "http://api.qc-ca.ovh:2223/api/woods/getWood/";
+        woodApiRestAddress += wood;
+        http.begin(woodApiRestAddress);
+        http.addHeader("Authorization", "Bearer 2e550451f21d19dc726b54e574d6d6b76665ade19f703af2a26384cf2d3adf9a8e9a5e28270471fa2a6a3c1982aafa2be5ff14179cbfbf299a189846dfc45101");
 
-            bool httpInitResult = http.begin(serverTo);
+        // Specify content-type header
+        http.addHeader("Content-Type", "application/x-www-form-urlencoded");
 
-            if (httpInitResult == false)
-            {
-                Serial.println("Erreur de connection au serveur");
-            }
-            http.addHeader("Authorization", "Bearer 2e550451f21d19dc726b54e574d6d6b76665ade19f703af2a26384cf2d3adf9a8e9a5e28270471fa2a6a3c1982aafa2be5ff14179cbfbf299a189846dfc45101");
-            
-            int httpCode = http.GET();
-            Serial.println("httpCode: " + String(httpCode));
-            if (httpCode > 0)
-            {
-                if (httpCode == HTTP_CODE_OK)
-                {
-                    String infoBois;
-                    String payload = http.getString();
-                    Serial.println(payload);
-                    StaticJsonDocument<2048> doc;
-                    deserializeJson(doc, payload);
-                    JsonObject elem = doc.as<JsonObject>();
-                    String results = elem["results"].as<String>();
+        int httpResponseCode = http.GET();
+        Serial.println("httpResponseCode: " + String(httpResponseCode));
 
-                    Serial.println("Payload: " + payload);
-                    request->send(200, "text/plain", payload);
-                }
-            }
-            else
-            {
-                request->send(401, "text/plain", "Erreur de connection au serveur");
-            }
-            
-            http.end(); 
+        String response;
+        if (httpResponseCode > 0)
+        {
+            response = http.getString();
+            Serial.println("response: " + response);
+        }
+        else
+        {
+            Serial.println("Error on HTTP request");
+        }
+        http.end();
+
+        DynamicJsonDocument doc(2048);
+        deserializeJson(doc, response);
+        String tempToSend;
+        for (JsonObject elem : doc.as<JsonArray>())
+        {
+            String woodName = elem["name"];
+            String woodType = elem["type"];
+            String woodOrigin = elem["origin"];
+            String WoodDryingTime = elem["dryingTime"];
+            String woodTemperature = elem["temperature"];
+
+            tempToSend+= String("Bois") + String("&") + woodName + String("&");
+            tempToSend+= String("Type") + String("&") + woodType + String("&");
+            tempToSend+= String("Origin") + String("&") + woodOrigin + String("&");
+            tempToSend+= String("Sechage") + String("&") + WoodDryingTime + String("&");
+            tempToSend+= String("Temps") + String("&") + woodTemperature + String("&");
+            Serial.println("tempToSend: " + tempToSend);
+
+            std::string repString = "";
+            String stringToSend = "tellCaracteristiques ";
+            stringToSend += String("Bois") + String(" ") + woodName + String(" ");
+            stringToSend += String("Type") + String(" ") + woodType + String(" ");
+            stringToSend += String("Origin") + String(" ") + woodOrigin + String(" ");
+            stringToSend += String("Sechage") + String(" ") + WoodDryingTime + String(" ");
+            stringToSend += String("Temps") + String(" ") + woodTemperature + String(" ");
+
+            if (ptrToCallBackFunction) repString = (*ptrToCallBackFunction)(stringToSend.c_str());
+
+            request->send(200, "text/plain", tempToSend);
+            break;
+        }
     });
+    
 
     // Route fonction pour récupérer le nom du du FOUR
-
         this->on("/getNomFour", HTTP_GET, [](AsyncWebServerRequest *request) {
         std::string repString = " ";
         if (ptrToCallBackFunction) repString = (*ptrToCallBackFunction)("askNomFour");
@@ -169,9 +197,4 @@ void MyServer::initAllRoutes() {
 
 /************************************************************************************************************************/
 
-
-// ADRESSE DE L'API : http://api.qc-ca.ovh:2223/bois?key=IlBv28V1NT81IvZWXVP126IZ6hJ5xd9fxIMP4gzIbvacr
-
-
-
-  
+// ADRESSE DE L'API : http://api.qc-ca.ovh:3000/bois?key=IlBv28V1NT81IvZWXVP126IZ6hJ5xd9fxIMP4gzIbvacr
