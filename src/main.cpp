@@ -57,13 +57,31 @@
 #include <ArduinoJson.h>
 
 #include "myFunctions.cpp" //fonctions utilitaires
-
 using namespace std;
 
 #include <HTTPClient.h>
 #include <WiFiManager.h>
 WiFiManager wm;
 #define WEBSERVER_H
+
+
+#include <Wire.h>
+#include <MyOled.h>
+#include <MyOledView.h>
+#include <MyOledViewWifiAp.h>
+#include <MyOledViewErrorWifiConnexion.h>
+#include <MyOledViewWorking.h>
+#include <MyOledViewInitialisation.h>
+#include <MyOledViewWorking.h>
+#include <MyOledViewWorkingOFF.h>
+#include <MyOledViewWorkingCold.h>
+#include <MyOledViewWorkingHeat.h>
+
+
+// #define GPIO_PIN_LED_HEAT_YELLOW 6  
+// #define GPIO_PIN_LED_HEAT_GREEN 7 
+// #define GPIO_PIN_LED_HEAT_RED 8 
+
 
 #include "WiFi.h"
 
@@ -76,11 +94,37 @@ WiFiServer server(80);
 #define DHTTYPE DHT22  //Le type de senseur utilisé (mais ce serait mieux d'avoir des DHT22 pour plus de précision)
 TemperatureStub *temperatureStub = NULL;
 
-//Pour la gestion du serveur ESP32
+
+// // valeur qui est affichée sur l'écran
+// float valueToPrint;
+
+// // permet de savoir si le Four est en marche
+// boolean demarre = false;
+// // permet à la page web de savoir quel est le status de l'esp
+// string status = "null";
+
+// // valeurs envoyées par le service web
+// string temperature = "null";
+// string duree = "null";
+// float temperatureFloat;
+// int dureeInt;
+
+
+// ------------------- Pour l'affichage ------------------------------------------
+MyOled *myOled = NULL;
+#define SCREEN_WIDTH 128      // taille de l'écran en longeur, en pixel
+#define SCREEN_HEIGHT 64      // taille de l'écran en largeur, en pixel
+#define OLED_RESET 4          // Reset pin # (or -1 if sharing Arduino reset pin)
+#define OLED_I2C_ADDRESS 0x3C // Adresse I2C de l'écran Oled
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
+int frame_delay = 15;
+
+//------------------------ Serveur ESP32 -----------------------------
+
 #include "MyServer.h"
 MyServer *myServer = NULL;
 
-//Variable pour la connection Wifi
+//------------------------- Variable pour la connection Wifi ---------
 const char *SSID = "SAC_";
 const char *PASSWORD = "sac_";
 String ssIDRandom;
@@ -88,6 +132,7 @@ String ssIDRandom;
 //fonction statique qui permet aux objets d'envoyer des messages (callBack) 
 //  arg0 : Action 
 // arg1 ... : Parametres
+
 std::string CallBackMessageListener(string message) {
     while(replaceAll(message, std::string("  "), std::string(" ")));
     //Décortiquer le message
@@ -108,6 +153,22 @@ std::string CallBackMessageListener(string message) {
      if(string(actionToDo.c_str()).compare(string("askNomFour")) == 0) {
     return(temp.c_str()); }
 
+//---------------- 
+
+//   if (string(actionToDo.c_str()).compare(string("declencheFour")) == 0)
+//     {
+//         demarre = true;
+
+//         Serial.println(arg1.c_str());
+//         Serial.println(arg2.c_str());
+//         temperature = arg1.c_str();
+//         istringstream(temperature) >> temperatureFloat;
+//         duree = arg2.c_str();
+//         istringstream(duree) >> dureeInt;
+
+//         Serial.println("four lancé");
+//         return "four lancé";
+//     }
 
 std::string result = "";
 return result;
@@ -128,7 +189,12 @@ void setup()
     Serial.println("Mac Address : " + WiFi.macAddress());
     delay(100);
 
- //Connexion au WifiManager
+
+    
+
+
+ // -------------------- Connexion au WifiManager ---------------------
+
     String ssIDRandom, PASSRandom;
     String stringRandom;
     stringRandom = get_random_string(4).c_str();
@@ -151,6 +217,11 @@ char strToPrint[128];
         Serial.println("Connexion Établie.");
         }
 
+
+    // -----------LED------------------------------
+
+
+
     // ----------- Routes du serveur ----------------
     myServer = new MyServer(80);
     myServer->initAllRoutes();
@@ -160,9 +231,22 @@ char strToPrint[128];
     temperatureStub = new TemperatureStub();
     temperatureStub->init(DHTPIN, DHTTYPE);
 
+    
+    // ----------- Initialisation des LED statuts ----------------
+    // pinMode(GPIO_PIN_LED_HEAT_RED, OUTPUT);
+    // pinMode(GPIO_PIN_LED_HEAT_GREEN, OUTPUT);
+    // pinMode(GPIO_PIN_LED_HEAT_RED, OUTPUT);
+
+    myOled = new MyOled(&Wire, OLED_I2C_ADDRESS, SCREEN_HEIGHT, SCREEN_WIDTH);
+    myOled->init();
+
+    
  }
 
 void loop() {
+
+
+
   }
 
 

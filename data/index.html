@@ -13,23 +13,26 @@
 <h1> Type de Bois</h1>
 
 <SELECT id="typeBois_ListBox_Select" onchange="getFromESP_getWoodCaracteristique()" size="1" class="choix">
-    <!-- <option selected="selected">Choisir le bois</option> -->
+    <option>Choisir un type de bois</option>
 </SELECT>
 
-<h1>Caracteristiques</h1>
+<div id="caracteristiquesBois" style="display: none;">
+    <h1>Caracteristiques</h1>
 
-<div>
-<h2> 
-    Bois : <span id="nom"></span>
-<br> 
-    Type : <span id="type"></span>
-<br>
-    Origine : <span id="origine"></span>
-<br> 
-    Temps de sechage : <span id="temps"></span> secondes 
-<br> 
-    Temperature de sechage : <span id="sechage"></span> celsius
-</h2>
+    <div>
+    <h2> 
+        Bois : <span id="nom"></span>
+    <br> 
+        Type : <span id="type"></span>
+    <br>
+        Origine : <span id="origine"></span>
+    <br> 
+        Temps de sechage : <span id="temps"></span><span> Secondes</span>  
+    <br> 
+        Temperature de sechage : <span id="sechage"></span><span> Celsius</span>
+    </h2>
+</div>
+
 </div>
 <h3> Controle du four de sechage </h3>
 
@@ -42,16 +45,14 @@
     <br>
     <p class="celcius" id="temp">Temperature</p>
     <br>
-    <button id="four" onclick="demarrageFour()" class="box">Demarrage du four</button>
+    <button id="four" onclick="demarrageFour();" class="box">Demarrage du four</button>
     </div>
     <div class="ligne">
         <p class="bleu"><span id="nom2"></span></p>
-        <p class="bleu"><span id="timer"></span>/<span id="tempsSechage2"></span> Temps de sechage(sec)</p>
-        <p class="bleu">(min: <span id="tempMin2"></span> Celsius)</p>
+        <p class="bleu"><span id="timer"></span>/<span id="tempsSechageInfo"></span> Secondes</p>
+        <p class="bleu">(Minimum: <span id="temperatureMinInfo"></span> Celsius)</p>
     <div class="right">
-        <span class="cercleRouge"></span>
-        <span class="cercleOrange"></span>
-        <span class="cercleVert"></span>
+        <span id="cercleStatut" class="cercleStatut"></span>
     </div>
     </div>
 </div>
