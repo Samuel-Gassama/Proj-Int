@@ -193,7 +193,33 @@ void MyServer::initAllRoutes() {
         });
 
     this->begin();
+
+
+
+    // envoit le signal de démarrage du four a l'esp
+    this->on("/declencheFour", HTTP_POST, [](AsyncWebServerRequest *request)
+             {
+                 String tmp = "";
+                 if (request->hasParam("temperature", true))
+                 {
+                     String temperature = request->getParam("temperature", true)->value();
+                     tmp = temperature;
+                 }
+                 if (request->hasParam("duree", true))
+                 {
+                     String duree = request->getParam("duree", true)->value();
+                     tmp = tmp + " " + duree;
+                 }
+
+                 tmp = "declencheFour " + tmp;
+
+                 if (ptrToCallBackFunction)
+                     (*ptrToCallBackFunction)(tmp.c_str());
+                 request->send(204); 
+                 
+                 });
 };
+
 
 /************************************************************************************************************************/
 

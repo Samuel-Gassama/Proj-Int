@@ -47,6 +47,27 @@
                 index.html              V1.0    Page index du site WEB
                 index.css               V1.0    CSS
                 script.js               V1.0    JS (fonctions JavaScript)
+
+     Arborescence des classes systèmes
+            /lib/
+                Mylib/
+                    MyServer             V1.0    Pour la gestion des routes pour le site WEB
+                    myFunctions          V1.0    Fonctions utilitaires pour le projet
+                MYOLED/
+                    MyOled.cpp              V1.1    Gestion d'un écran Oled Utilisant un GPIO d'un contrôleur
+                    MyOledView              V1.1    Gestion d'une VUE pour le OLed  
+                    MyOledViewErrorWifiConnexion     V1.2
+                    MyOledViewInitialisation         V1.2
+                    MyOledViewWifiAp                 V1.2
+                    MyOledViewWorking
+                    MyOledViewWorkingOff
+                    MyOledViewWorkingCold
+                    MyOledViewWorkingHeat
+            /src
+                main.cpp             V1.0   Code principal
+                MyButton.cpp         V1.0   Gestion d'un bouton pour permettre au système de démarrer
+                TemperatureStub.cpp  V1.0   Gestion de la température du Four (STUB)
+
               
  * */
 
@@ -77,6 +98,7 @@ WiFiManager wm;
 #include <MyOledViewWorkingCold.h>
 #include <MyOledViewWorkingHeat.h>
 
+#include <MyButton.h>
 
 // #define GPIO_PIN_LED_HEAT_YELLOW 6  
 // #define GPIO_PIN_LED_HEAT_GREEN 7 
@@ -95,22 +117,9 @@ WiFiServer server(80);
 TemperatureStub *temperatureStub = NULL;
 
 
-// // valeur qui est affichée sur l'écran
-// float valueToPrint;
-
-// // permet de savoir si le Four est en marche
-// boolean demarre = false;
-// // permet à la page web de savoir quel est le status de l'esp
-// string status = "null";
-
-// // valeurs envoyées par le service web
-// string temperature = "null";
-// string duree = "null";
-// float temperatureFloat;
-// int dureeInt;
 
 
-// ------------------- Pour l'affichage ------------------------------------------
+// ------------------- Pour l'affichage OLED  ------------------------------------------
 MyOled *myOled = NULL;
 #define SCREEN_WIDTH 128      // taille de l'écran en longeur, en pixel
 #define SCREEN_HEIGHT 64      // taille de l'écran en largeur, en pixel
@@ -153,22 +162,6 @@ std::string CallBackMessageListener(string message) {
      if(string(actionToDo.c_str()).compare(string("askNomFour")) == 0) {
     return(temp.c_str()); }
 
-//---------------- 
-
-//   if (string(actionToDo.c_str()).compare(string("declencheFour")) == 0)
-//     {
-//         demarre = true;
-
-//         Serial.println(arg1.c_str());
-//         Serial.println(arg2.c_str());
-//         temperature = arg1.c_str();
-//         istringstream(temperature) >> temperatureFloat;
-//         duree = arg2.c_str();
-//         istringstream(duree) >> dureeInt;
-
-//         Serial.println("four lancé");
-//         return "four lancé";
-//     }
 
 std::string result = "";
 return result;
@@ -189,12 +182,7 @@ void setup()
     Serial.println("Mac Address : " + WiFi.macAddress());
     delay(100);
 
-
-    
-
-
- // -------------------- Connexion au WifiManager ---------------------
-
+ //Connexion au WifiManager
     String ssIDRandom, PASSRandom;
     String stringRandom;
     stringRandom = get_random_string(4).c_str();
@@ -217,11 +205,6 @@ char strToPrint[128];
         Serial.println("Connexion Établie.");
         }
 
-
-    // -----------LED------------------------------
-
-
-
     // ----------- Routes du serveur ----------------
     myServer = new MyServer(80);
     myServer->initAllRoutes();
@@ -231,23 +214,49 @@ char strToPrint[128];
     temperatureStub = new TemperatureStub();
     temperatureStub->init(DHTPIN, DHTTYPE);
 
-    
     // ----------- Initialisation des LED statuts ----------------
-    // pinMode(GPIO_PIN_LED_HEAT_RED, OUTPUT);
+    // pinMode(GPIO_PIN_LED_HEAT_YELLOW, OUTPUT);
     // pinMode(GPIO_PIN_LED_HEAT_GREEN, OUTPUT);
     // pinMode(GPIO_PIN_LED_HEAT_RED, OUTPUT);
 
     myOled = new MyOled(&Wire, OLED_I2C_ADDRESS, SCREEN_HEIGHT, SCREEN_WIDTH);
     myOled->init();
-
     
  }
 
 void loop() {
 
+// -----------Gestion du bouton Action-----------
+    // int buttonAction = myButtonAction->checkMyButton();
+    // if (buttonAction > 1)
+    // { // Si appuyé plus de 0.1 secondes
+    //     Serial.println("action");
+    // }
 
+    // // -----------Gestion du bouton Reset-----------
+    // int buttonReset = myButtonReset->checkMyButton();
+    // if (buttonReset > 2)
+    // { // Si appuyé plus de 0.1 secondes
+    //     Serial.println("reset");
+    //     ESP.restart();
+    // }
+
+    // float temperatureTMP = temperatureStub->getTemperature();
+    // std::ostringstream vv;
+    // vv << temperatureTMP;
+
+    // display.clearDisplay();
+    // display.setTextSize(1);
+    // display.setCursor(1, 1);
+    // display.println("Temperature");
+    // display.setTextSize(2);
+    // display.setCursor(1, 40);
+    // display.println(vv.str().c_str());
+    // display.display();
+    // delay(1000);
 
   }
+
 
 
 /***************************************************************************************************************/

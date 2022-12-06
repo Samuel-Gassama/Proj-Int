@@ -112,7 +112,7 @@ function getFromESP_getWoodCaracteristique()
     xhttp.send(params);
 }
 
-// Fonction pour démarrer le compte à rebour du four
+// ----------------- Démarrage du Four à bois ----------------------
 
 function demarrageFour()
 {
@@ -145,4 +145,8 @@ function demarrageFour()
         alert("La temperature du four n'est pas assez elevee! ");
     }
 
-};
+ 
+
+
+
+}
