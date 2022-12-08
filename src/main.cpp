@@ -139,7 +139,7 @@ MyOledViewErrorWifiConnexion *viewErrorWifi = NULL;
 MyOledViewWorking *viewWorking = NULL;
 MyOledViewWorkingOFF *viewWorkingOFF = NULL;
 MyOledViewWorkingCOLD *viewWorkingCOLD = NULL;
-MyOledViewWorkingHEAT *viewWorkingHEAT = NULL;
+MyOledViewWorkingHeat *viewWorkingHEAT = NULL;
 
 
 //------------------------ Serveur ESP32 -----------------------------
