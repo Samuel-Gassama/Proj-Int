@@ -1,40 +1,32 @@
 /**
-    Gestion d'une VUE pour le OLed
-    @file MyOledViewWorkingHeat.cpp
-    @author Thanina Adda
-    @version 1.1 21/09/20
+    Gestion d'une VUE pour le OLed  
+    @file MyOledViewWorkingHEAT.cpp
+    @author Alex De Souza
+    @version 1.1 20/11/22 
 */
+
 #include <Arduino.h>
-#include "MyOledView.h"
-#include "MyOledViewWorkingHeat.h"
-#include "MyOled.h"
+#include "MyOledViewWorkingHEAT.h"
+
 using namespace std;
-//--------------fonctions d'affichage--------------------
-void MyOledViewWorkingHeat::display(Adafruit_SSD1306 *display)
-{
-    display->setTextSize(1);
 
-    display->setCursor(1, 0);
-    display->setTextSize(2);
-    display->println("Sac System");
-    display->setTextSize(1);
-    display->setCursor(70, 20);
-    display->println("Heat");
-    delay(20);
-    display->display();
+void MyOledViewWorkingHEAT::display(Adafruit_SSD1306 *adafruit){
 
-    delay(20);
+    MyOledViewWorking::display(adafruit);
+
+    adafruit->setTextSize(1);
+    adafruit->setCursor(70,20);
+    adafruit->print("Heating");
+
+    displayGifFire(adafruit, 80, 30);
+    
+    adafruit->setTextSize(2);
+    adafruit->setCursor(10, 30);
+    adafruit->print(getTag("temperature").c_str());
+
+    adafruit->display();
 }
-//--------------fonctions d'affichage--------------------
-void MyOledViewWorkingHeat::update(Adafruit_SSD1306 *update)
-{
-    MyOledViewWorking::update(update);
-    update->setCursor(1, 0);
-    update->setTextSize(2);
-    update->println("Sac System");
-    update->setTextSize(1);
-    update->setCursor(70, 20);
-    update->println("Heat");
-    delay(20);
-    update->display();
+
+void MyOledViewWorkingHEAT::update(Adafruit_SSD1306 *adafruit){
+    Serial.println("Update my view MyOledViewWorkingCOLD");
 }

@@ -1,83 +1,68 @@
-/**
-    Gestion d'une VUE pour le OLed
-    @file MyOledViewInitialisation.cpp
-    @author Thanina Adda
-    @version 1.1 21/11/30
-*/
+/* Copyright (C) 2021 Alain Dube
+ * All rights reserved.
+ *
+ * Projet Sac
+ * Ecole du Web
+ * Cours Objets connectés (c)2021
+ *  
+    @file     MyOledViewInitialisation.cpp
+    @author   Maxence MAZEAU
+    @version  1.1 21/08/15 
+
+    Historique des versions
+           Version    Date       Auteur       Description
+           1.1        05/08/21  Maxence       Première version du logiciel
+
+
+    platform = espressif32
+    board = esp32doit-devkit-v1
+    framework = arduino
+
+    */
 
 #include <Arduino.h>
-#include "MyOledView.h"
 #include "MyOledViewInitialisation.h"
 using namespace std;
 
-//--------------Setter--------------------
-string MyOledViewInitialisation::setNomDuSysteme(string valNom)
-{
-
-    this->NomDuSysteme = valNom;
-    return "";
+void MyOledViewInitialisation::setNomDuSysteme(string value){
+    NomDuSysteme = value;
 }
 
-
-string MyOledViewInitialisation::setIdDuSysteme(string valId)
-{
-
-    this->IdDuSysteme = valId;
-    return "";
+void MyOledViewInitialisation::setIdDuSysteme(string value){
+    IdDuSysteme = value;
 }
 
-
-string MyOledViewInitialisation::setSensibliteBoutonActif(string valActif)
-{
-
-    this->BoutonActif = valActif;
-    return "";
+void MyOledViewInitialisation::setSensibiliteBoutonAction(std::string val){
+    SensibiliteButtonAction = val;
 }
 
-string MyOledViewInitialisation::setSensibliteBoutonReset(string valReset)
-{
-
-    this->BoutonReset = valReset;
-    return "";
+void MyOledViewInitialisation::setSensibiliteBoutonReset(std::string val){
+    SensibiliteButtonReset = val;
 }
 
-//--------------fonctions d'affichage--------------------
-void MyOledViewInitialisation::display(Adafruit_SSD1306 *display)
-{
-    display->setTextSize(1);
+void MyOledViewInitialisation::display(Adafruit_SSD1306 *adafruit){
 
-    display->setCursor(1, 0);
-    display->setTextSize(2);
-    display->println("SAC System");
-    display->setTextSize(1);
-    display->setCursor(1, 20);
-    display->println(this->NomDuSysteme.c_str());
-    display->println(this->IdDuSysteme.c_str());
-    display->println("Bouton ACTIF: ????");
-    display->println("Bouton RESET: ????");
-    delay(20);
-    display->display();
 
-    delay(20);
+    char strID[128];
+    char strAction[128];
+    char strReset[128];
+    sprintf(strID,"ID : %s", IdDuSysteme.c_str());
+    sprintf(strAction,"Bouton Action : %s", SensibiliteButtonAction.c_str());
+    sprintf(strReset,"Bouton Reset : %s", SensibiliteButtonReset.c_str());
+
+    adafruit->clearDisplay();
+    adafruit->setTextSize(2);
+    adafruit->setTextColor(WHITE);
+    adafruit->setCursor(0,0);
+    adafruit->println(NomDuSysteme.c_str());
+    adafruit->setTextSize(1);
+    adafruit->println(strID);
+    adafruit->println("INITIALISATION");
+    adafruit->println(strAction);
+    adafruit->println(strReset);
+    adafruit->display();
 }
-//--------------fonctions d'affichage--------------------
-void MyOledViewInitialisation::update(Adafruit_SSD1306 *update)
-{
 
-    update->clearDisplay();
-    update->setTextSize(1);
-    update->setCursor(1, 0);
-    update->setTextSize(2);
-    update->println("SAC System");
-    update->setTextSize(1);
-    update->setCursor(1, 20);
-    update->println(this->NomDuSysteme.c_str());
-    update->println(this->IdDuSysteme.c_str());
-    update->println(this->BoutonActif.c_str());
-    update->println(this->BoutonReset.c_str());
-    delay(20);
-    update->display();
-    delay(20);
-
-
+void MyOledViewInitialisation::update(Adafruit_SSD1306 *adafruit){
+    display(adafruit);
 }

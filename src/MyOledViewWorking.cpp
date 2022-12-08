@@ -1,75 +1,59 @@
 /**
-    Gestion d'une VUE pour le OLed
+    Gestion d'une VUE pour le OLed : Base pour les écrans de travail
     @file MyOledViewWorking.cpp
-    @author Thanina Adda
-    @version 1.1 21/09/20
+    @author Alain Dubé
+    @version 1.1 20/11/20 
 */
 #include <Arduino.h>
-#include "MyOledView.h"
 #include "MyOledViewWorking.h"
-#include "MyOled.h"
+
 using namespace std;
 
-//------------------------init------------------------
-int MyOledViewWorking::init(string _id)
-{
+void MyOledViewWorking::init(std::string _id) {
+    Serial.println("Init dans MyOledViewWorking");
     MyOledView::init(_id);
-    // Fire24x24Pointers[0] = const_cast<unsigned char *>(&Fire24x24Pointers_0[0]);
-    // Fire24x24Pointers[1] = const_cast<unsigned char *>(&Fire24x24Pointers_1[0]);
-    // Fire24x24Pointers[2] = const_cast<unsigned char *>(&Fire24x24Pointers_2[0]);
-    // Fire24x24Pointers[3] = const_cast<unsigned char *>(&Fire24x24Pointers_3[0]);
-    // Fire24x24Pointers[4] = const_cast<unsigned char *>(&Fire24x24Pointers_4[0]);
-    // Fire24x24Pointers[5] = const_cast<unsigned char *>(&Fire24x24Pointers_5[0]);
-    // Fire24x24Pointers[6] = const_cast<unsigned char *>(&Fire24x24Pointers_6[0]);
-}
 
-//--------------fonctions d'affichage--------------------
-void MyOledViewWorking::display(Adafruit_SSD1306 *display)
-{
+    Fire24x24Pointers[0] = const_cast<unsigned char *>(&Fire24x24_1[0]);
+    Fire24x24Pointers[1] = const_cast<unsigned char *>(&Fire24x24_2[0]);
+    Fire24x24Pointers[2] = const_cast<unsigned char *>(&Fire24x24_3[0]);
+    Fire24x24Pointers[3] = const_cast<unsigned char *>(&Fire24x24_4[0]);
+    Fire24x24Pointers[4] = const_cast<unsigned char *>(&Fire24x24_5[0]);
+    Fire24x24Pointers[5] = const_cast<unsigned char *>(&Fire24x24_6[0]);
+    }
+ 
+void MyOledViewWorking::displayGifFire(Adafruit_SSD1306 *adafruit, int positionX, int positionY){
+    adafruit->drawBitmap(positionX, positionY, Fire24x24Pointers[5], 24, 16, WHITE);
+    }
 
-    display->clearDisplay();
-    display->setTextSize(1);
+void MyOledViewWorking::displayGifFireAnimated(Adafruit_SSD1306 *adafruit, int positionX, int positionY){
+    if(indexFireDelay>1000000) indexFireDelay = 0;
+    if(indexFire>1000000) indexFire = 0;
 
-    display->setCursor(1, 0);
-    display->setTextSize(2);
-    display->println("Sac System");
-    display->setTextSize(1);
-    display->setCursor(1, 20);
-    display->println(this->id().c_str());
-    display->setCursor(1, 40);
-    display->println(this->getTag("temperature").c_str());
-    display->setCursor(1, 50);
-    display->println(this->getTag("SslDuSysteme").c_str());
-    delay(20);
-    display->display();
+    adafruit->fillRect(positionX, positionY, 24, 16, BLACK);adafruit->display();
+    adafruit->drawBitmap(positionX, positionY, Fire24x24Pointers[(indexFire++) % 6], 24, 16, WHITE);
+    adafruit->display();
+    }
 
-    delay(20);
-}
-//--------------fonctions d'affichage--------------------
-void MyOledViewWorking::update(Adafruit_SSD1306 *update)
-{
-    update->clearDisplay();
-    update->setCursor(1, 0);
-    update->setTextSize(2);
-    update->println("Sac System");
-    update->setTextSize(1);
-    update->setCursor(1, 20);
-    update->println(this->id().c_str());
-    update->setTextSize(2);
-    update->setCursor(1, 30);
-    update->println(this->getTag("temperature").c_str());
-    update->setTextSize(1);
-    update->setCursor(1, 50);
-    update->println(this->getTag("SslDuSysteme").c_str());
-    delay(20);
-    update->display();
-}
+void MyOledViewWorking::update(Adafruit_SSD1306 *adafruit){
+    Serial.println("Update my view MyOledViewWorking");
+    }
 
-//--------------fonctions d'affichage gifFire--------------------
-void MyOledViewWorking::displayGifFire(Adafruit_SSD1306 *adafruitint)
-{
-}
-//--------------fonctions d'affichage gifFireAnimated--------------------
-void MyOledViewWorking::displayGifFireAnimated(Adafruit_SSD1306 *adafruitint, int positionX, int positionY)
-{
-}
+void MyOledViewWorking::display( Adafruit_SSD1306 *adafruit) {
+    Serial.println("MyOledViewWorking");
+    adafruit->setTextColor(WHITE);
+
+    adafruit->clearDisplay();
+    adafruit->setTextSize(2);
+    adafruit->setCursor(0, 0);
+    adafruit->print(getTag("nomDuSysteme").c_str());
+
+    adafruit->setTextSize(1);
+    adafruit->setCursor(0, 20);
+    adafruit->print("Id: ");
+    adafruit->print(getTag("idDuSysteme").c_str());
+    
+    adafruit->setCursor(40, 50);
+    adafruit->print(getTag("ipDuSysteme").c_str());
+
+    adafruit->display();
+    }

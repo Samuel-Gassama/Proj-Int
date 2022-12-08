@@ -100,6 +100,7 @@ WiFiManager wm;
 
 #include <MyButton.h>
 
+
 // #define GPIO_PIN_LED_HEAT_YELLOW 6  
 // #define GPIO_PIN_LED_HEAT_GREEN 7 
 // #define GPIO_PIN_LED_HEAT_RED 8 
@@ -116,6 +117,10 @@ WiFiServer server(80);
 #define DHTTYPE DHT22  //Le type de senseur utilisé (mais ce serait mieux d'avoir des DHT22 pour plus de précision)
 TemperatureStub *temperatureStub = NULL;
 
+// ------------------ Gestion boutons ----------------------
+#include "MyButton.h"
+MyButton *myButtonAction = NULL;
+MyButton *myButtonReset = NULL;
 
 
 
@@ -127,6 +132,15 @@ MyOled *myOled = NULL;
 #define OLED_I2C_ADDRESS 0x3C // Adresse I2C de l'écran Oled
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 int frame_delay = 15;
+
+MyOledViewInitialisation *viewIni = NULL;
+MyOledViewWorkingWifiAP *viewWifi = NULL;
+MyOledViewErrorWifiConnexion *viewErrorWifi = NULL;
+MyOledViewWorking *viewWorking = NULL;
+MyOledViewWorkingOFF *viewWorkingOFF = NULL;
+MyOledViewWorkingCOLD *viewWorkingCOLD = NULL;
+MyOledViewWorkingHEAT *viewWorkingHEAT = NULL;
+
 
 //------------------------ Serveur ESP32 -----------------------------
 
@@ -178,11 +192,44 @@ void Connect_WiFi()
 
 void setup()
 { 
-    Serial.begin(9600);
-    Serial.println("Mac Address : " + WiFi.macAddress());
+   Serial.begin(9600);
     delay(100);
 
- //Connexion au WifiManager
+   myOled = new MyOled(&Wire, OLED_RESET, SCREEN_HEIGHT, SCREEN_WIDTH);
+   myOled->init(OLED_I2C_ADDRESS, true);
+   viewWifi = new MyOledViewWorkingWifiAP();
+   viewIni = new MyOledViewInitialisation();
+
+
+
+    viewIni->setNomDuSysteme("SAC System");
+    viewIni->setIdDuSysteme("1234");
+    viewIni->setSensibiliteBoutonAction("????");
+    viewIni->setSensibiliteBoutonReset("????");
+
+    myOled->displayView(viewIni);
+
+
+   //Gestion des boutons
+    myButtonAction = new MyButton();        //Pour lire le bouton actions
+    myButtonAction->init(T8);
+    int sensibilisationButtonAction = myButtonAction->autoSensibilisation();
+
+    myButtonReset = new MyButton();         //Pour lire le bouton hard reset
+    myButtonReset->init(T9);
+    int sensibilisationButtonReset = myButtonReset->autoSensibilisation();
+
+   Serial.print("sensibilisationButtonAction : "); Serial.println(sensibilisationButtonAction);
+   Serial.print("sensibilisationButtonReset : "); Serial.println(sensibilisationButtonReset);
+
+    viewIni->setSensibiliteBoutonAction(String(sensibilisationButtonAction).c_str());
+    viewIni->setSensibiliteBoutonReset(String(sensibilisationButtonReset).c_str());
+
+    myOled->displayView(viewIni);
+
+   
+
+ //Connection au WifiManager
     String ssIDRandom, PASSRandom;
     String stringRandom;
     stringRandom = get_random_string(4).c_str();
@@ -204,6 +251,13 @@ char strToPrint[128];
     else {
         Serial.println("Connexion Établie.");
         }
+     myOled->clearDisplay();
+
+    viewWifi->setNomDuSysteme("SAC System");
+    viewWifi->setSsIDDuSysteme(ssIDRandom.c_str());
+    viewWifi->setpassDuSysteme(PASSRandom.c_str());
+
+     myOled->displayView(viewWifi);
 
     // ----------- Routes du serveur ----------------
     myServer = new MyServer(80);
@@ -221,6 +275,9 @@ char strToPrint[128];
 
     myOled = new MyOled(&Wire, OLED_I2C_ADDRESS, SCREEN_HEIGHT, SCREEN_WIDTH);
     myOled->init();
+
+    
+
     
  }
 

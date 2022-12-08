@@ -23,11 +23,17 @@
 
 #ifndef MYOLEDVIEWWORKINGHEAT
 #define MYOLEDVIEWWORKINGHEAT
+
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 #include <MyOledViewWorking.h>
+#include <string>
+#include <vector>
 
-class MyOledViewWorkingHeat : public MyOledViewWorking
+using std::vector;
+
+
+class MyOledViewWorkingHEAT : public MyOledViewWorking
 {
 
 private:

@@ -1,47 +1,30 @@
-/**
-    Class MyOledViewWifiAp : Gestion d'une VUE pour le OLed
-    @file MyOledViewWifiAp.h
-    @author Thanina Adda
-    @version 1.1 21/11/02
+ #include <Adafruit_SSD1306.h>
+ #include <string> 
+ #include "MyOledView.h"
 
-   
-    platform = espressif32
-    board = esp32doit-devkit-v1
-    framework = arduino
-    lib_deps =
-        Aucune
-    Autres librairies (à copier dans le répertoire lib)
-        Aucune
+#ifndef MYOLEDVIEWWORKINGWIFIAP_H
+#define MYOLEDVIEWWORKINGWIFIAP_H
 
-    Exemple d'utilisation
+ class MyOledViewWorkingWifiAP : public MyOledView{
 
-    myOledViewWifiAp->setNomDuSysteme("Initialisation Wifi");
-    myOled->updateCurrentView(myOledViewWifiAp);
-       
-**/
+    public :
 
-#ifndef MYOLEDVIEWWIFIAP_H
-#define MYOLEDVIEWWIFIAP_H
-
-#include <Adafruit_SSD1306.h>
-#include <MyOledView.h>
-#include <MyOled.h>
-#include <string>
-using std::vector;
-
-class MyOledViewWifiAp : public MyOledView
-{
-
-public:
-    std::string setNomDuSysteme(std::string valNom);
-    std::string setSslDuSysteme(std::string valSsl);
-    std::string setPassDuSysteme(std::string valPass);
-
-private:
-    std::string NomDuSysteme;
-    std::string SslDuSysteme;
-    std::string PassDuSysteme;
+      void display( Adafruit_SSD1306 *adafruit);
     void update(Adafruit_SSD1306 *adafruit);
-    void display(Adafruit_SSD1306 *adafruit);
-};
-#endif
+       void setNomDuSysteme(std::string val);
+       void setSsIDDuSysteme(std::string val);
+       void setpassDuSysteme(std::string val);
+
+    private:
+     
+        std::string NomDuSysteme;
+        std::string IdDuSysteme; 
+        std::string passDuSysteme;
+
+         //virtual void update(Adafruit_SSD1306 *adafruit) = 0;
+         //virtual void display( Adafruit_SSD1306 *adafruit) = 0;
+
+
+ };
+
+ #endif

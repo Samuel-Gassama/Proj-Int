@@ -43,3 +43,13 @@ void MyOledView::init(std::string _id) {
 std::string MyOledView::id() {
     return(myId);
     }
+
+ void MyOledView::display(Adafruit_SSD1306 *adafruit){
+
+      adafruit-> setTextSize(1);
+      adafruit->setTextColor(WHITE);
+      adafruit->setCursor(0,0);
+      adafruit->println("Hello, world!");
+      adafruit->display();
+ }
+ 

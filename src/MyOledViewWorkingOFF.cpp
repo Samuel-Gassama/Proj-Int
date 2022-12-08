@@ -1,30 +1,26 @@
 /**
-    Gestion d'une VUE pour le OLed
+    Gestion d'une VUE pour le OLed  
     @file MyOledViewWorkingOFF.cpp
-    @author Thanina Adda
-    @version 1.1 21/09/20
+    @author Alex De Souza
+    @version 1.1 20/11/22 
 */
+
 #include <Arduino.h>
-#include "MyOledView.h"
 #include "MyOledViewWorkingOFF.h"
-#include "MyOled.h"
+
 using namespace std;
 
+void MyOledViewWorkingOFF::display(Adafruit_SSD1306 *adafruit){
 
-//--------------fonctions d'affichage--------------------
-void MyOledViewWorkingOFF::display(Adafruit_SSD1306 *display)
-{
-    MyOledViewWorking::update(display);
-    display->setTextSize(1);
+    MyOledViewWorking::display(adafruit);
 
-    display->setCursor(1, 0);
-    display->setTextSize(2);
-    display->println("Sac System");
-    display->setTextSize(1);
-    display->setCursor(70, 20);
-    display->println("Waiting");
-    delay(20);
-    display->display();
+    adafruit->setTextSize(1);
+    adafruit->setCursor(70,20);
+    adafruit->print("Ready");
 
-    delay(20);
+    adafruit->setTextSize(1);
+    adafruit->setCursor(70, 30);
+    adafruit->print(getTag("temperature").c_str());
+
+    adafruit->display();
 }
