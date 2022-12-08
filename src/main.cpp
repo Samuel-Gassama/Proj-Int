@@ -101,9 +101,9 @@ WiFiManager wm;
 #include <MyButton.h>
 
 
-// #define GPIO_PIN_LED_HEAT_YELLOW 6  
-// #define GPIO_PIN_LED_HEAT_GREEN 7 
-// #define GPIO_PIN_LED_HEAT_RED 8 
+ #define GPIO_PIN_LED_HEAT_JAUNE 6  
+ #define GPIO_PIN_LED_HEAT_VERT 7 
+ #define GPIO_PIN_LED_HEAT_ROUGE 8 
 
 
 #include "WiFi.h"
@@ -118,13 +118,26 @@ WiFiServer server(80);
 TemperatureStub *temperatureStub = NULL;
 
 // ------------------ Gestion boutons ----------------------
+
 #include "MyButton.h"
 MyButton *myButtonAction = NULL;
 MyButton *myButtonReset = NULL;
 
+// ---------------------- Bool sur le fonctionnement du four ---------------------------------------
 
+// permet de savoir si le Four est en marche
+boolean demarre = false;
+// permet à la page web de savoir quel est le status de l'esp
+string status = "null";
 
+// ------------------- Valeur envoyées par le service WEB ------------------------------------------
+
+string temperature = "null";
+string duree = "null";
+float temperatureFloat;
+int dureeInt;
 // ------------------- Pour l'affichage OLED  ------------------------------------------
+
 MyOled *myOled = NULL;
 #define SCREEN_WIDTH 128      // taille de l'écran en longeur, en pixel
 #define SCREEN_HEIGHT 64      // taille de l'écran en largeur, en pixel
@@ -139,7 +152,7 @@ MyOledViewErrorWifiConnexion *viewErrorWifi = NULL;
 MyOledViewWorking *viewWorking = NULL;
 MyOledViewWorkingOFF *viewWorkingOFF = NULL;
 MyOledViewWorkingCOLD *viewWorkingCOLD = NULL;
-MyOledViewWorkingHeat *viewWorkingHEAT = NULL;
+MyOledViewWorkingHEAT *viewWorkingHEAT = NULL;
 
 
 //------------------------ Serveur ESP32 -----------------------------
@@ -148,6 +161,7 @@ MyOledViewWorkingHeat *viewWorkingHEAT = NULL;
 MyServer *myServer = NULL;
 
 //------------------------- Variable pour la connection Wifi ---------
+
 const char *SSID = "SAC_";
 const char *PASSWORD = "sac_";
 String ssIDRandom;
@@ -210,7 +224,8 @@ void setup()
     myOled->displayView(viewIni);
 
 
-   //Gestion des boutons
+   // ------------------ Gestion boutons ----------------------
+
     myButtonAction = new MyButton();        //Pour lire le bouton actions
     myButtonAction->init(T8);
     int sensibilisationButtonAction = myButtonAction->autoSensibilisation();
@@ -228,8 +243,8 @@ void setup()
     myOled->displayView(viewIni);
 
    
+// ------------------- Gestion du Wifi Manager ------------------------------------------
 
- //Connection au WifiManager
     String ssIDRandom, PASSRandom;
     String stringRandom;
     stringRandom = get_random_string(4).c_str();
@@ -269,9 +284,13 @@ char strToPrint[128];
     temperatureStub->init(DHTPIN, DHTTYPE);
 
     // ----------- Initialisation des LED statuts ----------------
-    // pinMode(GPIO_PIN_LED_HEAT_YELLOW, OUTPUT);
-    // pinMode(GPIO_PIN_LED_HEAT_GREEN, OUTPUT);
-    // pinMode(GPIO_PIN_LED_HEAT_RED, OUTPUT);
+
+    pinMode(GPIO_PIN_LED_HEAT_JAUNE, OUTPUT);
+    pinMode(GPIO_PIN_LED_HEAT_ROUGE, OUTPUT);
+    pinMode(GPIO_PIN_LED_HEAT_VERT , OUTPUT);
+
+
+    // ----------- Initialisation de l'écran ----------------
 
     myOled = new MyOled(&Wire, OLED_I2C_ADDRESS, SCREEN_HEIGHT, SCREEN_WIDTH);
     myOled->init();
@@ -284,33 +303,75 @@ char strToPrint[128];
 void loop() {
 
 // -----------Gestion du bouton Action-----------
-    // int buttonAction = myButtonAction->checkMyButton();
-    // if (buttonAction > 1)
-    // { // Si appuyé plus de 0.1 secondes
-    //     Serial.println("action");
-    // }
 
-    // // -----------Gestion du bouton Reset-----------
-    // int buttonReset = myButtonReset->checkMyButton();
-    // if (buttonReset > 2)
-    // { // Si appuyé plus de 0.1 secondes
-    //     Serial.println("reset");
-    //     ESP.restart();
-    // }
+    int buttonAction = myButtonAction->checkMyButton();
+    if (buttonAction > 1)
+    { // Si appuyé plus de 0.1 secondes
+        Serial.println("action");
+    }
 
-    // float temperatureTMP = temperatureStub->getTemperature();
-    // std::ostringstream vv;
-    // vv << temperatureTMP;
+    // -----------Gestion du bouton Reset-----------
+    int buttonReset = myButtonReset->checkMyButton();
+    if (buttonReset > 2)
+    { // Si appuyé plus de 0.1 secondes
+        Serial.println("reset");
+        ESP.restart();
+    }
+// ----------- Gestion du display, température-----------
 
-    // display.clearDisplay();
-    // display.setTextSize(1);
-    // display.setCursor(1, 1);
-    // display.println("Temperature");
-    // display.setTextSize(2);
-    // display.setCursor(1, 40);
-    // display.println(vv.str().c_str());
-    // display.display();
-    // delay(1000);
+    float temperatureTMP = temperatureStub->getTemperature();
+
+    display.clearDisplay();
+    display.setTextSize(1);
+    display.setCursor(1, 1);
+    display.println("Temperature");
+    display.setTextSize(2);
+    display.setCursor(1, 40);
+   display.display();
+    delay(1000);
+
+
+    if (!demarre)
+    {
+        status = "off";
+
+        digitalWrite(GPIO_PIN_LED_HEAT_VERT, LOW);
+        digitalWrite(GPIO_PIN_LED_HEAT_ROUGE, LOW);
+        digitalWrite(GPIO_PIN_LED_HEAT_JAUNE, LOW);
+        digitalWrite(GPIO_PIN_LED_HEAT_VERT, HIGH);
+        delay(70);
+    }
+    else
+    {
+        //si le four est lancé, on verifie la temperature
+        if (temperatureTMP < temperatureFloat)
+        {
+            status = "cold";
+              digitalWrite(GPIO_PIN_LED_HEAT_ROUGE, LOW);
+              digitalWrite(GPIO_PIN_LED_HEAT_ROUGE, LOW);
+              digitalWrite(GPIO_PIN_LED_HEAT_JAUNE, LOW);
+              digitalWrite(GPIO_PIN_LED_HEAT_VERT, HIGH);
+        }
+        else
+        {
+            //si la temperature est bonne, on declenche une boucle qui se termine à la fin du timer (ou si la temperature a trop baissée)
+            status = "heat";
+            int timer = dureeInt + 1;
+            do
+            {
+                timer = timer - 1;
+                Serial.print(timer);
+
+                digitalWrite(GPIO_PIN_LED_HEAT_VERT, LOW);
+                digitalWrite(GPIO_PIN_LED_HEAT_ROUGE, LOW);
+                digitalWrite(GPIO_PIN_LED_HEAT_JAUNE, LOW);
+                digitalWrite(GPIO_PIN_LED_HEAT_VERT, HIGH);
+                delay(1000);
+
+            } while (temperatureTMP >= temperatureFloat && timer > 0);
+            // quand le chauffage est terminé, le four doit s'arreter
+            demarre = false;
+        }
 
   }
 
