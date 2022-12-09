@@ -15,6 +15,9 @@ var temperature;
 
 // --------------------- Fonction GET qui permet d'afficher la liste des bois dans le select -----------
 
+window.addEventListener("load", setEtatFour("Off"));
+window.addEventListener("load", getNomFour());
+window.addEventListener("load", getFromEsp_TemperatureSensor());
 window.addEventListener("load", getAllWoodOptions());
 function getAllWoodOptions()
 {
@@ -61,18 +64,18 @@ setInterval(function getFromEsp_TemperatureSensor()
     xhttp.send();
 }, 3000);
 
-    // Demande le nom du système afin de l’afficher dans la vue HTML
+    // ------------------ Demande le nom du système afin de l’afficher dans la vue HTML ----------------
 
-    // function getFromESP_getNom () {
-    //     var xhttp = new XMLHttpRequest();
-    //     xhttp.onreadystatechange = function () {
-    //     if (this.readyState == 4 && this.status == 200) {
-    //     document.getElementById("nom").innerHTML = this.responseText;
-    //     }
-    //     };
-    //     xhttp.open("GET", "getNomEsp", true);
-    //     xhttp.send();
-    //    }
+    function getFromESP_getNom () {
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function () {
+        if (this.readyState == 4 && this.status == 200) {
+        document.getElementById("nom").innerHTML = this.responseText;
+        }
+        };
+        xhttp.open("GET", "getNomEsp", true);
+        xhttp.send();
+       }
 
 
        // Fonction récupérer les infos de l'API Bois
@@ -145,7 +148,10 @@ function demarrageFour()
         if (temp >= document.getElementById("sechage").textContent)
         {
             if (i == 0)
-            document.getElementById("cercleStatut").style.backgroundColor = "orange";
+            {
+                document.getElementById("cercleStatut").style.backgroundColor = "orange";
+                setEtatFour("Heat");
+            }
             var timer = setInterval(function()
             {
                     i++
@@ -155,8 +161,9 @@ function demarrageFour()
                     if (i == document.getElementById("temps").textContent || document.getElementById('four').clicked == true)
                     {
                         document.getElementById("cercleStatut").style.backgroundColor = "green";
+                        setEtatFour("Cold");
                         clearInterval(timer);
-                        alert("Le sechage est finit ! ");
+                        setTimeout(function() { alert("Le sechage est finit ! "); }, 100);
                     }
                     else if (document.getElementById('four').clicked == true)
                     {

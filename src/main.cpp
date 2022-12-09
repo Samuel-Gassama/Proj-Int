@@ -196,9 +196,11 @@ std::string CallBackMessageListener(string message) {
     string arg5 = getValue(message, ' ', 5);
 
     string actionToDo = getValue(message, ' ', 0);
-    std::string nomDuFour = "Four9394";
-     if(string(actionToDo.c_str()).compare(string("askNomFour")) == 0) {
-    return(temp.c_str()); }
+    std::string nomDuFour = "Four #1";
+    if (string(actionToDo.c_str()).compare(string("askNomFour")) == 0)
+    {
+        return(nomDuFour.c_str());
+    }
 
     // fonctions qui renvois le statut actuel du four ( off, cold, heat)
     if (string(actionToDo.c_str()).compare(string("askStatus")) == 0)

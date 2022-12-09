@@ -205,16 +205,13 @@ void MyServer::initAllRoutes() {
 
 // ----------------------- Fonction pour changer l'état du four -----------------------
                  
-    this->on("/setEtatFour", HTTP_GET, [](AsyncWebServerRequest *request) {
+   this->on("/setEtatFour", HTTP_GET, [](AsyncWebServerRequest *request) {
         if(request->hasParam("etat")){
             request->send(200, "text/plain",  "Etat changed");
             String action = "setEtatFour" ;
-
-            char buffer[40];
-
             String inputEtat = request->getParam("etat")->value();
-            sprintf(buffer, "%s|%s", action.c_str(), inputEtat.c_str());
-            if(ptrToCallBackFunction)(*ptrToCallBackFunction)(buffer);
+            String donnee = action + " " + inputEtat;
+            if(ptrToCallBackFunction)(*ptrToCallBackFunction)(donnee.c_str());
         }
         else{
             request->send(400, "text/plain", "Etat not changed");
@@ -222,7 +219,6 @@ void MyServer::initAllRoutes() {
     });
 
     this->begin();
-
     //--------------------------- route recuperer le nom du four  ---------------------------
 
         this->on("/getNomFour", HTTP_GET, [](AsyncWebServerRequest *request) {
