@@ -321,6 +321,29 @@ char strToPrint[128];
 
      myOled->displayView(myOledViewWifiAp);
 
+    // ----------- Initialisation des LED statuts ----------------
+
+    pinMode(GPIO_PIN_LED_HEAT_BLEU, OUTPUT);
+    pinMode(GPIO_PIN_LED_HEAT_ROUGE, OUTPUT);
+    pinMode(GPIO_PIN_LED_HEAT_VERT , OUTPUT);
+
+
+    for(int i = 0; i < 2; i++){
+    digitalWrite(GPIO_PIN_LED_HEAT_ROUGE,HIGH);
+    digitalWrite(GPIO_PIN_LED_HEAT_VERT,HIGH);
+    digitalWrite(GPIO_PIN_LED_HEAT_BLEU,HIGH);
+    delay(1000);
+    digitalWrite(GPIO_PIN_LED_HEAT_ROUGE,LOW);
+    digitalWrite(GPIO_PIN_LED_HEAT_VERT,LOW);
+    digitalWrite(GPIO_PIN_LED_HEAT_BLEU,LOW);
+    delay(1000);
+    }
+
+    digitalWrite(GPIO_PIN_LED_HEAT_ROUGE,HIGH);
+    digitalWrite(GPIO_PIN_LED_HEAT_VERT,HIGH);
+    digitalWrite(GPIO_PIN_LED_HEAT_BLEU,HIGH);
+
+
     // ----------- Routes du serveur ----------------
 
     myServer = new MyServer(80);
