@@ -112,7 +112,7 @@ MyOledViewWorkingHEAT *myOledViewWorkingHEAT = NULL;
 
  #define GPIO_PIN_LED_HEAT_BLEU 2
  #define GPIO_PIN_LED_HEAT_VERT 0
- #define GPIO_PIN_LED_HEAT_ROUGE 19
+ #define GPIO_PIN_LED_HEAT_ROUGE 18
 
 #include "WiFi.h"
 
@@ -128,6 +128,7 @@ float temperature;
 int currentTemperatureDisplayed = 0;
 char strTemperature[128];
 float temperatureActuelle = 0.0;
+string etatFour = "null";
 
 #define nomSysteme "SAC System" 
 string idDuSysteme = "1337";
@@ -199,10 +200,31 @@ std::string CallBackMessageListener(string message) {
      if(string(actionToDo.c_str()).compare(string("askNomFour")) == 0) {
     return(temp.c_str()); }
 
+    // fonctions qui renvois le statut actuel du four ( off, cold, heat)
+    if (string(actionToDo.c_str()).compare(string("askStatus")) == 0)
+    {
+        return (status.c_str());
+    }
+
+    if (string(actionToDo.c_str()).compare(string("action")) == 0)
+    {
+        return (String("Ok").c_str());
+    }
+
+    std::string result = "";
+    return result;
+
+// ---------------------- Renvoi le status du four  ---------------------------------
+
+  if (string(actionToDo.c_str()).compare(string("setEtatFour")) == 0)
+    {
+      etatFour = arg1;               //On convertit le string en float
+    }
 
 std::string result = "";
 return result;
 }
+// ---------------------- Fonction pour l'affichage du status du four sur le OLED ---------------------------------
 
 void displayStateOled(){
   delay(10);
@@ -327,6 +349,7 @@ char strToPrint[128];
     pinMode(GPIO_PIN_LED_HEAT_ROUGE, OUTPUT);
     pinMode(GPIO_PIN_LED_HEAT_VERT , OUTPUT);
 
+// ----------- Clignotement des led au démarrage du système----------------
 
     for(int i = 0; i < 2; i++){
     digitalWrite(GPIO_PIN_LED_HEAT_ROUGE,HIGH);
@@ -354,21 +377,7 @@ char strToPrint[128];
 
     temperatureStub = new TemperatureStub();
     temperatureStub->init(DHTPIN, DHTTYPE);
-
-    // ----------- Initialisation des LED statuts ----------------
-
-    pinMode(GPIO_PIN_LED_HEAT_BLEU, OUTPUT);
-    pinMode(GPIO_PIN_LED_HEAT_ROUGE, OUTPUT);
-    pinMode(GPIO_PIN_LED_HEAT_VERT , OUTPUT);
-
-
-    // ----------- Initialisation de l'écran ----------------
-
-    // myOled = new MyOled(&Wire, OLED_I2C_ADDRESS, SCREEN_HEIGHT, SCREEN_WIDTH);
-    // myOled->init();
-
     
-
     
  }
 

@@ -7,6 +7,11 @@
 #include <Arduino.h>
 #include "MyServer.h"
 #include "ArduinoJson.h"
+
+#include <soc/timer_group_struct.h>
+#include <soc/timer_group_reg.h>
+#include <HTTPClient.h>
+
 using namespace std;
 
 typedef std::string (*CallbackType)(std::string);
@@ -190,6 +195,22 @@ void MyServer::initAllRoutes() {
                  String lireStatus = String(repString.c_str());
 
                  request->send(200, "text/plain", lireStatus); });
+                 
+    this->on("/setEtatFour", HTTP_GET, [](AsyncWebServerRequest *request) {
+        if(request->hasParam("etat")){
+            request->send(200, "text/plain",  "Etat changed");
+            String action = "setEtatFour" ;
+
+            char buffer[40];
+
+            String inputEtat = request->getParam("etat")->value();
+            sprintf(buffer, "%s|%s", action.c_str(), inputEtat.c_str());
+            if(ptrToCallBackFunction)(*ptrToCallBackFunction)(buffer);
+        }
+        else{
+            request->send(400, "text/plain", "Etat not changed");
+        }
+    });
 
     //-------------------------------------------------------------------Formulaire connexion
     this->begin();
@@ -208,8 +229,7 @@ void MyServer::initAllRoutes() {
 
     this->begin();
 
-
-
+   
     // envoit le signal de démarrage du four a l'esp
     this->on("/declencheFour", HTTP_POST, [](AsyncWebServerRequest *request)
              {

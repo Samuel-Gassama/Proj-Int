@@ -189,4 +189,8 @@ function demarrageFour()
     xhttp.send();
 }, 1000);
 
-
+function setEtatFour(etat) {
+    var xhttp = new XMLHttpRequest();
+    xhttp.open("GET", "setEtatFour?etat=" + etat, true);    
+    xhttp.send();
+}
