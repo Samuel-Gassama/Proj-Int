@@ -1,43 +1,37 @@
 /**
-    Class MyOledViewWorkingHeat : Gestion d'une VUE pour le OLed
-    @file MyOledViewWorkingHeat.h
-    @author Thanina Adda
-    @version 1.1 21/11/30
-
-   
+    Class MyOledViewWorkingHEAT : Gestion d'une VUE pour le OLed
+    @file MyOledViewWorkingHEAT.h 
+    @author Alex De Souza
+    @version 1.1 24/11/22 
+    
+    Historique des versions   
+                            Versions  Date      Auteur      Description
+                            1.1      17/11/22    Ald        Première version de la classe
+                            
+                            
     platform = espressif32
     board = esp32doit-devkit-v1
     framework = arduino
-    lib_deps =
+    lib_deps = 
         Aucune
     Autres librairies (à copier dans le répertoire lib)
         Aucune
-
-    Exemple d'utilisation
-
-     myOledViewWorkingHeat->setParams("temperature", vv.str());
-    myOled->displayView(myOledViewWorkingHeat);
-       
+    
 **/
 
+#ifndef MyOledViewWorkingHEAT_H
+#define MyOledViewWorkingHEAT_H
 
-#ifndef MYOLEDVIEWWORKINGHEAT
-#define MYOLEDVIEWWORKINGHEAT
-
-#include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
-#include <MyOledViewWorking.h>
+#include "MyOledViewWorking.h"
 #include <string>
 #include <vector>
-
 using std::vector;
 
+class MyOledViewWorkingHEAT: public MyOledViewWorking {
 
-class MyOledViewWorkingHEAT : public MyOledViewWorking
-{
-
-private:
-    void display(Adafruit_SSD1306 *adafruit);
-    void update(Adafruit_SSD1306 *adafruit);
+    private:
+        void display(Adafruit_SSD1306 *adafruit);
+        void update(Adafruit_SSD1306 *adafruit);
 };
 #endif

@@ -179,6 +179,20 @@ void MyServer::initAllRoutes() {
         }
     });
     
+    // récupere le status de l'esp (off/cold/heat)
+    this->on("/lireStatus", HTTP_GET, [](AsyncWebServerRequest *request)
+             {
+                 std::string repString = "";
+
+                 if (ptrToCallBackFunction)
+                     repString = (*ptrToCallBackFunction)("askStatus");
+
+                 String lireStatus = String(repString.c_str());
+
+                 request->send(200, "text/plain", lireStatus); });
+
+    //-------------------------------------------------------------------Formulaire connexion
+    this->begin();
 
     // Route fonction pour récupérer le nom du du FOUR
         this->on("/getNomFour", HTTP_GET, [](AsyncWebServerRequest *request) {

@@ -145,8 +145,32 @@ function demarrageFour()
         alert("La temperature du four n'est pas assez elevee! ");
     }
 
- 
+ setInterval(function getStatus() {
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function () {
+        if (this.status == 200) {
+            console.debug("retour 200");
+            console.debug(this.responseText);
+            document.getElementById("ledRouge").style.color = "black";
+            document.getElementById('ledBleu').style.color = 'black';
+            document.getElementById('ledVert').style.color = 'black';
+            switch (this.responseText) {
+                case "off":
+                    document.getElementById('ledVert').style.color = 'green';
+                    break;
+                case "cold":
+                    document.getElementById('ledBleu').style.color = 'blue';
+                    break;
+                case "heat":
+                    document.getElementById('ledRouge').style.color = 'red';
+                    break;
+                default:
 
-
+            }
+        }
+    };
+    xhttp.open("GET", "lireStatus", true);
+    xhttp.send();
+}, 1000);
 
 }

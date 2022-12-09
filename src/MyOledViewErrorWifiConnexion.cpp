@@ -1,7 +1,7 @@
 /**
     Gestion d'une VUE pour le OLed
     @file MyOledViewErrorWifiConnexion.cpp
-    @author Thanina Adda
+    @author Samuel GASSAMA
     @version 1.1 21/11/30
 */
 #include <Arduino.h>

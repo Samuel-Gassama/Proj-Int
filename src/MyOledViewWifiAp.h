@@ -1,30 +1,29 @@
- #include <Adafruit_SSD1306.h>
- #include <string> 
- #include "MyOledView.h"
 
-#ifndef MYOLEDVIEWWORKINGWIFIAP_H
-#define MYOLEDVIEWWORKINGWIFIAP_H
 
- class MyOledViewWorkingWifiAP : public MyOledView{
 
-    public :
+#ifndef MYOLEDVIEWWIFIAP_H
+#define MYOLEDVIEWWIFIAP_H
 
-      void display( Adafruit_SSD1306 *adafruit);
-    void update(Adafruit_SSD1306 *adafruit);
-       void setNomDuSysteme(std::string val);
-       void setSsIDDuSysteme(std::string val);
-       void setpassDuSysteme(std::string val);
+#include <Adafruit_SSD1306.h>
+#include "MyOledView.h"
+#include <string>
+#include <vector>
+using std::vector;
+
+class MyOledViewWifiAp: public MyOledView {
+    
+    public:
+        void setNomDuSysteme(std::string val);
+        void setSsIDDuSysteme(std::string val);
+        void setPassDuSysteme(std::string val);
 
     private:
-     
-        std::string NomDuSysteme;
-        std::string IdDuSysteme; 
+        std::string nomDuSysteme;
+        std::string ssIDDuSysteme;
         std::string passDuSysteme;
 
-         //virtual void update(Adafruit_SSD1306 *adafruit) = 0;
-         //virtual void display( Adafruit_SSD1306 *adafruit) = 0;
-
-
- };
-
- #endif
+        void display(Adafruit_SSD1306 *adafruit);
+        void update(Adafruit_SSD1306 *adafruit);
+      
+};
+#endif
