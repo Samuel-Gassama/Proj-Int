@@ -26,34 +26,37 @@ void MyServer::initCallback(CallbackType callback) {
 void MyServer::initAllRoutes() {
     currentTemperature = 3.3f;
 
-    //Initialisation du SPIFF.
+    //---------------------- Route initialisation du SPIFFS ----------------------
     if (!SPIFFS.begin(true)) {
         Serial.println("An Error has occurred while mounting SPIFFS");
         return;
         }
 
-    //Route initiale (page html)
+    //---------------------- Route de la page index.html ----------------------
+
     this->on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
         request->send(SPIFFS, "/index.html", "text/html");
         });
 
-    //Route du script JavaScript
+    //----------------------Route du script JavaScript ----------------------
+
     this->on("/script.js", HTTP_GET, [](AsyncWebServerRequest *request) {
         request->send(SPIFFS, "/script.js", "text/javascript");
         });
 
-    // Route du style css pour l'index.html
+    //----------------------- Route pour le style.css -----------------------
+
     this->on("/style.css", HTTP_GET, [](AsyncWebServerRequest *request) {
         request->send(SPIFFS, "/style.css", "text/css");
         });
    
-    // Route pour ajouter l'image sac.png
+    // ----------------------- Route pour l'image SAC.png
 
    this->on("/sac.png", HTTP_GET, [](AsyncWebServerRequest *request) {
         request->send(SPIFFS, "/sac.png", "");
         });
    
-    // Route pour tester le bouton callback
+    //----------------------- test du bouton call back
 
     this->on("/button", HTTP_GET, [](AsyncWebServerRequest *request) { // ADDED ROUTE FOR CALLBACK
         std::string repString = "";
@@ -63,7 +66,8 @@ void MyServer::initAllRoutes() {
         request->send(200, "text/plain", button);
         });
 
-        // Route fonction pour lire la mesure de la température du senseur 
+        // ----------------------- Récupération de la température  ------------------------------
+
         this->on("/getTemperatureSensor", HTTP_GET, [](AsyncWebServerRequest *request) {
         std::string repString = "";
         if (ptrToCallBackFunction) repString = (*ptrToCallBackFunction)("temperature");
@@ -71,7 +75,7 @@ void MyServer::initAllRoutes() {
         request->send(200, "text/plain", temp);
         });
 
-        // Route fonction pour récupérer l'API des bois
+        //------------------------------ Récupération des bois avec l'api --------------------------------
 
         this->on("/getAllWoodOptions", HTTP_GET, [](AsyncWebServerRequest *request)
         {
@@ -111,6 +115,7 @@ void MyServer::initAllRoutes() {
             
             http.end(); 
     });
+// ---------------------- Récupérer les caractéristiques du bois -----------------------
 
     this->on("/getWoodCaracteristiques", HTTP_POST, [](AsyncWebServerRequest *request)
     {
@@ -184,7 +189,8 @@ void MyServer::initAllRoutes() {
         }
     });
     
-    // récupere le status de l'esp (off/cold/heat)
+// ----------------------- Fonction pour lire l'état du four -----------------------
+
     this->on("/lireStatus", HTTP_GET, [](AsyncWebServerRequest *request)
              {
                  std::string repString = "";
@@ -195,6 +201,9 @@ void MyServer::initAllRoutes() {
                  String lireStatus = String(repString.c_str());
 
                  request->send(200, "text/plain", lireStatus); });
+
+
+// ----------------------- Fonction pour changer l'état du four -----------------------
                  
     this->on("/setEtatFour", HTTP_GET, [](AsyncWebServerRequest *request) {
         if(request->hasParam("etat")){
@@ -230,7 +239,8 @@ void MyServer::initAllRoutes() {
     this->begin();
 
    
-    // envoit le signal de démarrage du four a l'esp
+    //--------------------------- route déclencher le four  ---------------------------
+    
     this->on("/declencheFour", HTTP_POST, [](AsyncWebServerRequest *request)
              {
                  String tmp = "";

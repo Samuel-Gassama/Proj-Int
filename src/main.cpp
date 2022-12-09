@@ -218,7 +218,7 @@ std::string CallBackMessageListener(string message) {
 
   if (string(actionToDo.c_str()).compare(string("setEtatFour")) == 0)
     {
-      etatFour = arg1;               //On convertit le string en float
+      etatFour = arg1;            
     }
 
 std::string result = "";
@@ -377,8 +377,7 @@ char strToPrint[128];
 
     temperatureStub = new TemperatureStub();
     temperatureStub->init(DHTPIN, DHTTYPE);
-    
-    
+
  }
 
 void loop() {
@@ -392,6 +391,7 @@ void loop() {
     }
 
     // -----------Gestion du bouton Reset-----------
+
     int buttonReset = myButtonReset->checkMyButton();
     if (buttonReset > 2)
     { // Si appuyé plus de 0.1 secondes
