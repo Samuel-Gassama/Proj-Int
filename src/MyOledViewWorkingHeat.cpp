@@ -13,7 +13,7 @@ using namespace std;
 void MyOledViewWorkingHEAT::display(Adafruit_SSD1306 *adafruit){
 
     MyOledViewWorking::display(adafruit);
-
+    adafruit->clearDisplay();
     adafruit->setTextSize(1);
     adafruit->setCursor(70,20);
     adafruit->print("Heating");
@@ -23,7 +23,6 @@ void MyOledViewWorkingHEAT::display(Adafruit_SSD1306 *adafruit){
     adafruit->setTextSize(2);
     adafruit->setCursor(10, 30);
     adafruit->print(getTag("temperature").c_str());
-
     adafruit->display();
 }
 

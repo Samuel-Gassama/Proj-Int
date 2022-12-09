@@ -6,7 +6,7 @@
  * Cours Objets connectés (c)2022
  *  
     @file     main.cpp
-    @author   David Tremblay
+    @author   Samuel GASSAMA
     @version  1.0 17/11/2022
 
     Historique des versions
@@ -127,8 +127,9 @@ TemperatureStub *temperatureStub = NULL;
 float temperature;
 int currentTemperatureDisplayed = 0;
 char strTemperature[128];
-float temperatureActuelle = 0.0;
+
 string etatFour = "null";
+
 
 #define nomSysteme "SAC System" 
 string idDuSysteme = "1337";
@@ -142,9 +143,7 @@ MyButton *myButtonReset = NULL;
 // ---------------------- Bool sur le fonctionnement du four ---------------------------------------
 
 // permet de savoir si le Four est en marche
-boolean demarre = false;
-string status = "null";// permet à la page web de savoir quel est le status de l'esp
-
+string status;
 
 
 
@@ -194,25 +193,13 @@ std::string CallBackMessageListener(string message) {
     string arg3 = getValue(message, ' ', 3);
     string arg4 = getValue(message, ' ', 4);
     string arg5 = getValue(message, ' ', 5);
-
     string actionToDo = getValue(message, ' ', 0);
+
     std::string nomDuFour = "Four #1";
     if (string(actionToDo.c_str()).compare(string("askNomFour")) == 0)
     {
         return(nomDuFour.c_str());
     }
-
-    // fonctions qui renvois le statut actuel du four ( off, cold, heat)
-    if (string(actionToDo.c_str()).compare(string("askStatus")) == 0)
-    {
-        return (status.c_str());
-    }
-
-    if (string(actionToDo.c_str()).compare(string("action")) == 0)
-    {
-        return (String("Ok").c_str());
-    }
-
 
 // ---------------------- Renvoi le status du four  ---------------------------------
 
@@ -380,6 +367,8 @@ char strToPrint[128];
 
 void loop() {
 
+
+
 // -----------Gestion du bouton Action-----------
 
     int buttonAction = myButtonAction->checkMyButton();
@@ -404,47 +393,40 @@ void loop() {
     delay(1000);
 
 
-    // if (!demarre)
-    // {
-    //     status = "off";
+    if (status == "off")
+    {
+       
 
-    //     digitalWrite(GPIO_PIN_LED_HEAT_VERT, LOW);
-    //     digitalWrite(GPIO_PIN_LED_HEAT_ROUGE, LOW);
-    //     digitalWrite(GPIO_PIN_LED_HEAT_BLEU, LOW);
-    //     digitalWrite(GPIO_PIN_LED_HEAT_VERT, HIGH);
-    //     delay(70);
-    // }
-    // else
-    // {
-    //     //si le four est lancé, on verifie la temperature
-    //     if (temperatureTMP < temperatureFloat)
-    //     {
-    //         status = "cold";
-    //           digitalWrite(GPIO_PIN_LED_HEAT_ROUGE, LOW);
-    //           digitalWrite(GPIO_PIN_LED_HEAT_ROUGE, LOW);
-    //           digitalWrite(GPIO_PIN_LED_HEAT_BLEU, LOW);
-    //           digitalWrite(GPIO_PIN_LED_HEAT_VERT, HIGH);
-    //     }
-    //     else
-    //     {
-    //         //si la temperature est bonne, on declenche une boucle qui se termine à la fin du timer (ou si la temperature a trop baissée)
-    //         status = "heat";
-    //         int timer = dureeInt + 1;
-    //         do
-    //         {
-    //             timer = timer - 1;
-    //             Serial.print(timer);
+        digitalWrite(GPIO_PIN_LED_HEAT_VERT, LOW);
+        digitalWrite(GPIO_PIN_LED_HEAT_ROUGE, HIGH);
+        digitalWrite(GPIO_PIN_LED_HEAT_BLEU, LOW);
+        digitalWrite(GPIO_PIN_LED_HEAT_VERT, LOW);
+        delay(70);
+        myOledViewWorkingHEAT = new MyOledViewWorkingHEAT();
+        myOledViewWorkingHEAT->setParams("nomDuSysteme", nomSysteme);
+        myOledViewWorkingHEAT->setParams("idDuSysteme", idDuSysteme);
+        myOledViewWorkingHEAT->setParams("temperature", strTemperature);
+        myOledViewWorkingHEAT->setParams("ipDuSysteme",WiFi.localIP().toString().c_str());
+        myOled->displayView(myOledViewWorkingHEAT);
+    }
+    else if (status == "Cold")
+    {
+        
+        digitalWrite(GPIO_PIN_LED_HEAT_ROUGE, LOW);
+        digitalWrite(GPIO_PIN_LED_HEAT_BLEU, HIGH);
+        digitalWrite(GPIO_PIN_LED_HEAT_VERT, LOW);
 
-    //             digitalWrite(GPIO_PIN_LED_HEAT_VERT, LOW);
-    //             digitalWrite(GPIO_PIN_LED_HEAT_ROUGE, LOW);
-    //             digitalWrite(GPIO_PIN_LED_HEAT_BLEU, LOW);
-    //             digitalWrite(GPIO_PIN_LED_HEAT_VERT, HIGH);
-    //             delay(1000);
+    }
+    else if (status == "Heat")
+        {
+            digitalWrite(GPIO_PIN_LED_HEAT_ROUGE, LOW);
+            digitalWrite(GPIO_PIN_LED_HEAT_BLEU, LOW);
+            digitalWrite(GPIO_PIN_LED_HEAT_VERT, HIGH);
+            delay(1000);
 
-    //         } while (temperatureTMP >= temperatureFloat && timer > 0);
-    //         // quand le chauffage est terminé, le four doit s'arreter
-    //         demarre = false;
-    //     }
+        
+            // quand le chauffage est terminé, le four doit s'arreter
+        }
 
   }
 

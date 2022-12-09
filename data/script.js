@@ -81,6 +81,7 @@ setInterval(function getFromEsp_TemperatureSensor()
        // Fonction récupérer les infos de l'API Bois
 
 // --------------------- Fonction GET qui permet d'afficher les caractéristiques du bois -----------
+
 function getFromESP_getWoodCaracteristique()
 {
     var xhttp = new XMLHttpRequest();
