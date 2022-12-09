@@ -118,32 +118,48 @@ function demarrageFour()
 {
     var i = 0;
     var temp = parseInt(temperature);
+    var ready = false;
 
-    document.getElementById("cercleStatut").style.backgroundColor = "orange";
-    if (temp >= document.getElementById("sechage").textContent)
+    if (document.getElementById("typeBois_ListBox_Select").value == "0")
     {
-        var timer = setInterval(function()
-        {
-                i++
-                document.getElementById("timer").innerHTML = i;
-                
-                console.log(i);
-                if (i == document.getElementById("temps").textContent || document.getElementById('four').clicked == true)
-                {
-                    document.getElementById("cercleStatut").style.backgroundColor = "green";
-                    clearInterval(timer);
-                    alert("Le sechage est finit ! ");
-                }
-                else if (document.getElementById('four').clicked == true)
-                {
-                    clearInterval(timer);
-                }
-        }, 1000);
+        alert("Veuillez choisir un bois ! ");
     }
     else
     {
-        alert("La temperature du four n'est pas assez elevee! ");
+        ready = true;
     }
+
+    if (ready)
+    {
+        if (temp >= document.getElementById("sechage").textContent)
+        {
+            if (i == 0)
+            document.getElementById("cercleStatut").style.backgroundColor = "orange";
+            var timer = setInterval(function()
+            {
+                    i++
+                    document.getElementById("timer").innerHTML = i;
+                    
+                    console.log(i);
+                    if (i == document.getElementById("temps").textContent || document.getElementById('four').clicked == true)
+                    {
+                        document.getElementById("cercleStatut").style.backgroundColor = "green";
+                        clearInterval(timer);
+                        alert("Le sechage est finit ! ");
+                    }
+                    else if (document.getElementById('four').clicked == true)
+                    {
+                        clearInterval(timer);
+                    }
+            }, 1000);
+        }
+        else
+        {
+            alert("La temperature du four n'est pas assez elevee! ");
+        }
+    }
+
+};
 
  setInterval(function getStatus() {
     var xhttp = new XMLHttpRequest();
@@ -173,4 +189,4 @@ function demarrageFour()
     xhttp.send();
 }, 1000);
 
-}
+

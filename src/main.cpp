@@ -204,7 +204,7 @@ std::string result = "";
 return result;
 }
 
-void displayGoodScreen(){
+void displayStateOled(){
   delay(10);
   sprintf(strTemperature, "%g", temperature);
   if(isEqualString(status.c_str(), string("HEAT"))) myOled->updateCurrentView(myOledViewWorkingHEAT);
