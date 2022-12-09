@@ -1,10 +1,20 @@
+/*****************************************************
+ * Fichier: script.js
+ * Description: Fichier Javascript du projet
+ * Date: 18/11/22
+ * Auteur: Samuel GASSAMA
+ * version : 1.6
+ * ---------------------------------------------------
+ */
+
+
+
 var boisChoisi;
 var temperature;
 
 
-// Fonction qui permet d'obtenir le nom du système (actualisée toutes les secondes)
+// --------------------- Fonction GET qui permet d'afficher la liste des bois dans le select -----------
 
-// Appel un GET sur le serveur pour récupérer des données d'un API REST | Fonction getAllWood
 window.addEventListener("load", getAllWoodOptions());
 function getAllWoodOptions()
 {
@@ -33,6 +43,7 @@ function getAllWoodOptions()
     xhttp.open("GET", "getAllWoodOptions", true);
     xhttp.send();
 }
+//-------------------Fonction getTemperatureSensor---------------------
 
 setInterval(function getFromEsp_TemperatureSensor()
 {
@@ -66,7 +77,7 @@ setInterval(function getFromEsp_TemperatureSensor()
 
        // Fonction récupérer les infos de l'API Bois
 
-// Fonction qui permet d'afficher les caractéristiques du bois choisi en envoyant un GET sur le serveur avec le nom du bois choisi
+// --------------------- Fonction GET qui permet d'afficher les caractéristiques du bois -----------
 function getFromESP_getWoodCaracteristique()
 {
     var xhttp = new XMLHttpRequest();
@@ -112,7 +123,7 @@ function getFromESP_getWoodCaracteristique()
     xhttp.send(params);
 }
 
-// ----------------- Démarrage du Four à bois ----------------------
+// ----------------- Fonction Démarrage du Four à bois ----------------------
 
 function demarrageFour()
 {
@@ -160,34 +171,7 @@ function demarrageFour()
     }
 
 };
-
- setInterval(function getStatus() {
-    var xhttp = new XMLHttpRequest();
-    xhttp.onreadystatechange = function () {
-        if (this.status == 200) {
-            console.debug("retour 200");
-            console.debug(this.responseText);
-            document.getElementById("ledRouge").style.color = "black";
-            document.getElementById('ledBleu').style.color = 'black';
-            document.getElementById('ledVert').style.color = 'black';
-            switch (this.responseText) {
-                case "off":
-                    document.getElementById('ledVert').style.color = 'green';
-                    break;
-                case "cold":
-                    document.getElementById('ledBleu').style.color = 'blue';
-                    break;
-                case "heat":
-                    document.getElementById('ledRouge').style.color = 'red';
-                    break;
-                default:
-
-            }
-        }
-    };
-    xhttp.open("GET", "lireStatus", true);
-    xhttp.send();
-}, 1000);
+// ----------------- Fonction setInterval pour recuperer le status du four  ----------------------
 
 function setEtatFour(etat) {
     var xhttp = new XMLHttpRequest();

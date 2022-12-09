@@ -1,12 +1,12 @@
 /**
     Class MyOledViewWorkingHEAT : Gestion d'une VUE pour le OLed
     @file MyOledViewWorkingHEAT.h 
-    @author Alex De Souza
+    @author Samuel GASSAMA
     @version 1.1 24/11/22 
     
     Historique des versions   
                             Versions  Date      Auteur      Description
-                            1.1      17/11/22    Ald        Première version de la classe
+                            1.1      17/11/22    Samuel        Première version de la classe
                             
                             
     platform = espressif32

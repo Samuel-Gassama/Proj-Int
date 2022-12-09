@@ -1,7 +1,7 @@
 /**
     Gestion d'un serveur WEB
     @file MyServer.cpp
-    @author David Tremblay
+    @author David Tremblay & Samuel GASSAMA
     @version 1.1 17/11/2022
 */
 #include <Arduino.h>
@@ -221,10 +221,10 @@ void MyServer::initAllRoutes() {
         }
     });
 
-    //-------------------------------------------------------------------Formulaire connexion
     this->begin();
 
-    // Route fonction pour récupérer le nom du du FOUR
+    //--------------------------- route recuperer le nom du four  ---------------------------
+
         this->on("/getNomFour", HTTP_GET, [](AsyncWebServerRequest *request) {
         std::string repString = " ";
         if (ptrToCallBackFunction) repString = (*ptrToCallBackFunction)("askNomFour");
@@ -240,7 +240,7 @@ void MyServer::initAllRoutes() {
 
    
     //--------------------------- route déclencher le four  ---------------------------
-    
+
     this->on("/declencheFour", HTTP_POST, [](AsyncWebServerRequest *request)
              {
                  String tmp = "";

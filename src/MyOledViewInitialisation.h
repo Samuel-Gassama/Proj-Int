@@ -3,11 +3,11 @@
     Class MyOledView : Gestion d'une VUE pour le OLed
     @file MyOledViewInitialisation.h
     @author Samuel GASSAMA
-    @version 1.0 11/08/2021
+    @version 1.0 25/11/2022
     
-    Historique des versions   
-                            Versions  Date      Auteur      Description
-                            1.1      11/08/21   Samuel       Première version de la classe
+    Historique des versions
+           Version    Date       Auteur       Description
+           1.1        25/11/22  Samuel       Première version du logiciel
                             
                             
     platform = espressif32

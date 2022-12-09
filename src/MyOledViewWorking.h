@@ -2,11 +2,11 @@
     Class MyOledViewWorking : Vue utilisée par MyOled (Affiche la page montrant le système en opération)
     @file MyOledViewWorking.h 
     @author Alain Dubé
-    @version 1.1 21/09/20 
+    @version 1.1 22/11/25
     
     Historique des versions   
-                            Versions  Date      Auteur      Description
-                            1.1      21/09/20   Ald         Première version de la classe
+                            Versions  Date      Auteur            Description
+                            1.1      22/11/25   SAmuel GASSAMA     Première version de la classe
                             
                             
     platform = espressif32
@@ -26,6 +26,8 @@
         myOledViewWorking->setStatusDuSysteme("System OK");
         myOled->displayView(myOledViewWorking);
 **/
+
+
 #ifndef MYOLEDVIEWWORKING_H
 #define MYOLEDVIEWWORKING_H
 #include "MyOledView.h"

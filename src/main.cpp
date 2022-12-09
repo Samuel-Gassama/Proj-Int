@@ -211,8 +211,6 @@ std::string CallBackMessageListener(string message) {
         return (String("Ok").c_str());
     }
 
-    std::string result = "";
-    return result;
 
 // ---------------------- Renvoi le status du four  ---------------------------------
 
@@ -335,8 +333,6 @@ char strToPrint[128];
         delay(1000);
     };
         
-    //  myOled->clearDisplay();
-
     myOledViewWifiAp->setNomDuSysteme("SAC System");
     myOledViewWifiAp->setSsIDDuSysteme(ssIDRandom.c_str());
     myOledViewWifiAp->setPassDuSysteme(PASSRandom.c_str());

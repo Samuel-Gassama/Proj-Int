@@ -6,12 +6,12 @@
  * Cours Objets connectés (c)2021
  *  
     @file     MyOledViewInitialisation.cpp
-    @author   Maxence MAZEAU
+    @author   Samuel GASSAMA
     @version  1.1 21/08/15 
 
     Historique des versions
            Version    Date       Auteur       Description
-           1.1        05/08/21  Maxence       Première version du logiciel
+           1.1        25/11/22  Samuel       Première version du logiciel
 
 
     platform = espressif32
