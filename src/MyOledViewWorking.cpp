@@ -34,12 +34,13 @@ void MyOledViewWorking::displayGifFireAnimated(Adafruit_SSD1306 *adafruit, int p
     adafruit->display();
     }
 
-void MyOledViewWorking::update(Adafruit_SSD1306 *adafruit){
+void MyOledViewWorking::update(Adafruit_SSD1306 *adafruit)
+{
     Serial.println("Update my view MyOledViewWorking");
-    }
+}
 
-void MyOledViewWorking::display( Adafruit_SSD1306 *adafruit) {
-    Serial.println("MyOledViewWorking");
+void MyOledViewWorking::display( Adafruit_SSD1306 *adafruit)
+{
     adafruit->setTextColor(WHITE);
 
     adafruit->clearDisplay();
@@ -56,4 +57,4 @@ void MyOledViewWorking::display( Adafruit_SSD1306 *adafruit) {
     adafruit->print(getTag("ipDuSysteme").c_str());
 
     adafruit->display();
-    }
+}

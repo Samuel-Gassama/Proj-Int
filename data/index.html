@@ -3,80 +3,70 @@
  * Fichier: index.html
  * Description: Fichier html, contenant le code html de la page d'accueil
  * Date: 23/09/22
- * Auteur: Samuel GASSAMA
+ * Auteur: David Tremblay et Samuel Gassama
  * version : 1.3
  * ----------------------------------------------------->
-
-
- 
 <!DOCTYPE html>
 <html>
  
 <head>
-
-<link rel="stylesheet" href="style.css" type="text/css">
-
+    <link rel="stylesheet" href="style.css" type="text/css">
 </head>
 
 <body>
     <img alt="image" src="sac.png" width="300" height="200">
+    <h2> Nom du Four : <span id="nomFour"></span></h2>
+    <h1> Type de Bois</h1>
 
-<h1> Type de Bois</h1>
+    <SELECT id="typeBois_ListBox_Select" onchange="getFromESP_getWoodCaracteristique()" size="1" class="choix">
+        <option value="0">Choisir un type de bois</option>
+    </SELECT>
 
-<SELECT id="typeBois_ListBox_Select" onchange="getFromESP_getWoodCaracteristique()" size="1" class="choix">
-    <option value="0">Choisir un type de bois</option>
-</SELECT>
+    <div id="caracteristiquesBois" style="display: none;">
+        <h1>Caracteristiques</h1>
 
-<div id="caracteristiquesBois" style="display: none;">
-    <h1>Caracteristiques</h1>
-
-    <div>
-    <h2> 
-        Bois : <span id="nom"></span>
-    <br> 
-        Type : <span id="type"></span>
-    <br>
-        Origine : <span id="origine"></span>
-    <br> 
-        Temps de sechage : <span id="temps"></span><span> Secondes</span>  
-    <br> 
-        Temperature de sechage : <span id="sechage"></span><span> Celsius</span>
-    </h2>
-</div>
-
-</div>
-<h3> Controle du four de sechage </h3>
-
-
-
-
-<div class="block">
-    <div class="center">
-    <p> Temperature du Four </p>
-    <br>
-    <p class="celcius" id="temp">Temperature</p>
-    <br>
-    <button id="four" onclick="demarrageFour();" class="box">Demarrage du four</button>
+        <div>
+        <h2> 
+            Bois : <span id="nom"></span>
+        <br> 
+            Type : <span id="type"></span>
+        <br>
+            Origine : <span id="origine"></span>
+        <br> 
+            Temps de sechage : <span id="temps"></span><span> Secondes</span>  
+        <br> 
+            Temperature de sechage : <span id="sechage"></span><span> Celsius</span>
+        </h2>
     </div>
-    <div class="ligne">
-        <p class="bleu"><span id="nom2"></span></p>
-        <p class="bleu"><span id="timer"></span>/<span id="tempsSechageInfo"></span> Secondes</p>
-        <p class="bleu">(Minimum: <span id="temperatureMinInfo"></span> Celsius)</p>
-    <div class="right">
-        <span id="cercleStatut" class="cercleStatut"></span>
+
     </div>
+    <h3> Controle du four de sechage </h3> <br>
+
+    <div class="block">
+        <div class="center">
+        <p> Temperature du Four </p>
+        <br>
+        <p class="celcius" id="temp">Temperature</p>
+        <br>
+        <button id="four" onclick="demarrageFour();" class="box">Demarrage du four</button>
+        </div>
+        <div class="ligne">
+            <p class="bleu"><span id="nom2"></span></p>
+            <p class="bleu"><span id="timer"></span>/<span id="tempsSechageInfo"></span> Secondes</p>
+            <p class="bleu">(Minimum: <span id="temperatureMinInfo"></span> Celsius)</p>
+        <div class="right">
+            <span id="cercleStatut" class="cercleStatut"></span>
+        </div>
+        </div>
     </div>
-</div>
 </body>
 
 <script type = "text/javascript" src="script.js">
-
     getFromESP_getAllWoodOptions();
     demarrageFour();
     getFromEsp_TemperatureSensor();
     getFromESP_getWoodCaracteristique();
     getNomFour();
-    
 </script>
 
 </html>

@@ -6,7 +6,7 @@
     
     Historique des versions   
                             Versions  Date      Auteur            Description
-                            1.1      22/11/25   SAmuel GASSAMA     Première version de la classe
+                            1.1      22/11/25   David Tremblay et Samuel Gassama     Première version de la classe
                             
                             
     platform = espressif32

@@ -2,7 +2,7 @@
 /**
     Class MyOledView : Gestion d'une VUE pour le OLed
     @file MyOledViewInitialisation.h
-    @author Samuel GASSAMA
+    @author David Tremblay et Samuel Gassama
     @version 1.0 25/11/2022
     
     Historique des versions

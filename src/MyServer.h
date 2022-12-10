@@ -45,7 +45,7 @@ class MyServer : public AsyncWebServer {
         typedef std::string (*CallbackType)(std::string);
         void initCallback(CallbackType callback);
                 
-        void initAllRoutes();  
+        void initAllRoutes();
 
     private:
         static CallbackType ptrToCallBackFunction;

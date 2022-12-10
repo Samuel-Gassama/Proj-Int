@@ -6,7 +6,7 @@
  * Cours Objets connectés (c)2021
  *  
     @file     MyOledViewWifiAp.cpp
-    @author   Samuel GASSAMA
+    @author   David Tremblay et Samuel Gassama
     @version  1.1 22/11/25
 
     Historique des versions

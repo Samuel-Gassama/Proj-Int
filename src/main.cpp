@@ -11,7 +11,9 @@
 
     Historique des versions
            Version      Date            Auteur           Description
-           1.0        17/11/2022    David Tremblay       Première version du logiciel
+           1.0        17/11/2022    Samuel GASSAMA       Première version du logiciel
+           1.0        17/11/2022    Samuel GASSAMA       Première version du logiciel
+
 
     platform = espressif32
     board = esp32doit-devkit-v1
@@ -85,41 +87,36 @@ using namespace std;
 WiFiManager wm;
 #define WEBSERVER_H
 
-
 #include <Wire.h>
 #include <MyOled.h>
 #include <MyOledView.h>
 
+// --------------Ajout des classes Oled---------------
 #include "MyOledViewWifiAp.h"
-MyOledViewWifiAp *myOledViewWifiAp = NULL;
-
 #include "MyOledViewInitialisation.h"
-MyOledViewInitialisation *myOledViewInitialisation = NULL;
-
 #include "MyOledViewWorkingOFF.h"
-MyOledViewWorkingOFF *myOledViewWorkingOFF = NULL;
-
 #include "MyOledViewWorkingCOLD.h"
-MyOledViewWorkingCOLD *myOledViewWorkingCOLD = NULL;
-
 #include "MyOledViewWorkingHEAT.h"
+
+MyOledViewWifiAp *myOledViewWifiAp = NULL;
+MyOledViewInitialisation *myOledViewInitialisation = NULL;
+MyOledViewWorkingOFF *myOledViewWorkingOFF = NULL;
+MyOledViewWorkingCOLD *myOledViewWorkingCOLD = NULL;
 MyOledViewWorkingHEAT *myOledViewWorkingHEAT = NULL;
 
-
-#include <MyButton.h>
-
 // --------------Gestion des LEDS---------------
+ #define GPIO_PIN_LED_YELLOW 12
+ #define GPIO_PIN_LED_GREEN  14
+ #define GPIO_PIN_LED_RED    27
 
- #define GPIO_PIN_LED_HEAT_BLEU 2
- #define GPIO_PIN_LED_HEAT_VERT 0
- #define GPIO_PIN_LED_HEAT_ROUGE 18
-
+// --------------Gestion du serveur WEB---------------
 #include "WiFi.h"
 
 const char* ssid = "ESP32-Soft-accessPoint";
 const char* password = "microcontrollerslab";
 WiFiServer server(80);
 
+// --------------Gestion du Senseur de Température---------------
 #include "TemperatureStub.h"
 #define DHTPIN  15   // Pin utilisée par le senseur DHT11 / DHT22
 #define DHTTYPE DHT22  //Le type de senseur utilisé (mais ce serait mieux d'avoir des DHT22 pour plus de précision)
@@ -127,33 +124,26 @@ TemperatureStub *temperatureStub = NULL;
 float temperature;
 int currentTemperatureDisplayed = 0;
 char strTemperature[128];
-
-string etatFour = "null";
-
+float temperatureActuelle = 0.0;
 
 #define nomSysteme "SAC System" 
 string idDuSysteme = "1337";
 
 // ------------------ Gestion boutons ----------------------
-
+#include <MyButton.h>
 #include "MyButton.h"
 MyButton *myButtonAction = NULL;
 MyButton *myButtonReset = NULL;
 
 // ---------------------- Bool sur le fonctionnement du four ---------------------------------------
+boolean demarre = false; // permet de savoir si le Four est en marche
+bool redLedIsOn = false;
+bool greenLedIsOn = false;
+bool yellowLedIsOn = false;
+string status = "Off"; // permet a l'esp et au site de savoir quel est le status du four
+int timer = 0; // permet de gérer le délais dans la fonction loop
 
-// permet de savoir si le Four est en marche
-string status;
-
-
-
-// ------------------- Valeur envoyées par le service WEB ------------------------------------------
-
-string duree = "null";
-float temperatureFloat;
-int dureeInt;
 // ------------------- Pour l'affichage OLED  ------------------------------------------
-
 MyOled *myOled = NULL;
 #define SCREEN_WIDTH 128      // taille de l'écran en longeur, en pixel
 #define SCREEN_HEIGHT 64      // taille de l'écran en largeur, en pixel
@@ -162,15 +152,11 @@ MyOled *myOled = NULL;
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 int frame_delay = 15;
 
-
-
 //------------------------ Serveur ESP32 -----------------------------
-
 #include "MyServer.h"
 MyServer *myServer = NULL;
 
 //------------------------- Constance pour la connection Wifi ---------
-
 const char *SSID = "SAC_";
 const char *PASSWORD = "sac_";
 String ssIDRandom;
@@ -178,22 +164,21 @@ String ssIDRandom;
 //fonction statique qui permet aux objets d'envoyer des messages (callBack) 
 //  arg0 : Action 
 // arg1 ... : Parametres
-
-std::string CallBackMessageListener(string message) {
-    while(replaceAll(message, std::string("  "), std::string(" ")));
-    //Décortiquer le message
-    string arg1 = getValue(message, ' ', 0);
-    float temperature = temperatureStub->getTemperature();
-    String temp = (String)temperature;
-    if(string(arg1.c_str()).compare(string("temperature")) == 0){
-    return (temp.c_str());
-    }
-
+std::string CallBackMessageListener(string message)
+{
+    while (replaceAll(message, std::string("  "), std::string(" ")));
+    // Décortiquer le message
+    string arg1 = getValue(message, ' ', 1);
     string arg2 = getValue(message, ' ', 2);
     string arg3 = getValue(message, ' ', 3);
-    string arg4 = getValue(message, ' ', 4);
-    string arg5 = getValue(message, ' ', 5);
     string actionToDo = getValue(message, ' ', 0);
+
+    float temperature = temperatureStub->getTemperature();
+    String temp = (String)temperature;
+    if (string(actionToDo.c_str()).compare(string("temperature")) == 0)
+    {
+        return (temp.c_str());
+    }
 
     std::string nomDuFour = "Four #1";
     if (string(actionToDo.c_str()).compare(string("askNomFour")) == 0)
@@ -201,52 +186,70 @@ std::string CallBackMessageListener(string message) {
         return(nomDuFour.c_str());
     }
 
-// ---------------------- Renvoi le status du four  ---------------------------------
-
-  if (string(actionToDo.c_str()).compare(string("setEtatFour")) == 0)
+    // fonctions qui renvois le statut actuel du four ( off, cold, heat)
+    if (string(actionToDo.c_str()).compare(string("askStatus")) == 0)
     {
-      etatFour = arg1;            
+        return (status.c_str());
     }
 
-std::string result = "";
-return result;
+    if (string(actionToDo.c_str()).compare(string("action")) == 0)
+    {
+        return (String("Ok").c_str());
+    }
+
+    // ---------------------- Set le status du four  ---------------------------------
+    if (string(actionToDo.c_str()).compare(string("setEtatFour")) == 0)
+    {
+        status = arg1;
+        return (String("Ok").c_str());           
+    }
+
+    std::string result = "";
+    return result;
 }
+
 // ---------------------- Fonction pour l'affichage du status du four sur le OLED ---------------------------------
+void displayStateOled()
+{
+    delay(10);
+    sprintf(strTemperature, "%g", temperature);
 
-void displayStateOled(){
-  delay(10);
-  sprintf(strTemperature, "%g", temperature);
-  if(isEqualString(status.c_str(), string("HEAT"))) myOled->updateCurrentView(myOledViewWorkingHEAT);
-  if(isEqualString(status.c_str(), string("DONE"))) {
-    myOledViewWorkingOFF = new MyOledViewWorkingOFF();
-    myOledViewWorkingOFF->setParams("nomDuSysteme", nomSysteme);
-    myOledViewWorkingOFF->setParams("idDuSysteme", idDuSysteme);
-    myOledViewWorkingOFF->setParams("temperature", strTemperature);
-    myOledViewWorkingOFF->setParams("ipDuSysteme",WiFi.localIP().toString().c_str());
-    myOled->displayView(myOledViewWorkingOFF);
-    currentTemperatureDisplayed = temperature;
-  }
+    if (status == "Off")
+    {
+        myOledViewWorkingOFF = new MyOledViewWorkingOFF();
+        myOledViewWorkingOFF->setParams("nomDuSysteme", nomSysteme);
+        myOledViewWorkingOFF->setParams("idDuSysteme", idDuSysteme);
+        myOledViewWorkingOFF->setParams("temperature", strTemperature);
+        myOledViewWorkingOFF->setParams("ipDuSysteme", WiFi.localIP().toString().c_str());
+        myOled->displayView(myOledViewWorkingOFF);
+        currentTemperatureDisplayed = temperature;
+        Serial.println("Display State OFF");
+    }
 
-  if(isEqualString(status.c_str(), string("COLD"))) {
-    myOledViewWorkingCOLD = new MyOledViewWorkingCOLD();
-    myOledViewWorkingCOLD->setParams("nomDuSysteme", nomSysteme);
-    myOledViewWorkingCOLD->setParams("idDuSysteme", idDuSysteme.c_str());
-    myOledViewWorkingCOLD->setParams("temperature", strTemperature);
-    myOledViewWorkingCOLD->setParams("ipDuSysteme",WiFi.localIP().toString().c_str());
-    myOled->displayView(myOledViewWorkingCOLD);
-    currentTemperatureDisplayed = temperature;
-  }
+    if (status == "Cold")
+    {
+        myOledViewWorkingCOLD = new MyOledViewWorkingCOLD();
+        myOledViewWorkingCOLD->setParams("nomDuSysteme", nomSysteme);
+        myOledViewWorkingCOLD->setParams("idDuSysteme", idDuSysteme.c_str());
+        myOledViewWorkingCOLD->setParams("temperature", strTemperature);
+        myOledViewWorkingCOLD->setParams("ipDuSysteme", WiFi.localIP().toString().c_str());
+        myOled->displayView(myOledViewWorkingCOLD);
+        currentTemperatureDisplayed = temperature;
+        Serial.println("Display State COLD");
+    }
 
-  if(isEqualString(status.c_str(), string("HEAT"))) {
-    myOledViewWorkingHEAT = new MyOledViewWorkingHEAT();
-    myOledViewWorkingHEAT->setParams("nomDuSysteme", nomSysteme);
-    myOledViewWorkingHEAT->setParams("idDuSysteme", idDuSysteme);
-    myOledViewWorkingHEAT->setParams("temperature", strTemperature);
-    myOledViewWorkingHEAT->setParams("ipDuSysteme",WiFi.localIP().toString().c_str());
-    myOled->displayView(myOledViewWorkingHEAT);
-    currentTemperatureDisplayed = temperature;
-  }
-} 
+    if(status == "Heat")
+    {
+        myOledViewWorkingHEAT = new MyOledViewWorkingHEAT();
+        myOledViewWorkingHEAT->setParams("nomDuSysteme", nomSysteme);
+        myOledViewWorkingHEAT->setParams("idDuSysteme", idDuSysteme);
+        myOledViewWorkingHEAT->setParams("temperature", strTemperature);
+        myOledViewWorkingHEAT->setParams("ipDuSysteme", WiFi.localIP().toString().c_str());
+        myOled->displayView(myOledViewWorkingHEAT);
+        currentTemperatureDisplayed = temperature;
+        Serial.println("Display State HEAT");
+    }
+}
 
 void Connect_WiFi()
 {
@@ -257,17 +260,16 @@ void Connect_WiFi()
     }
 }
 
-
 void setup()
-{ 
-   Serial.begin(9600);
+{
+    Serial.begin(9600);
     delay(100);
 
-   myOled = new MyOled(&Wire, OLED_RESET, SCREEN_HEIGHT, SCREEN_WIDTH);
-   myOled->init(OLED_I2C_ADDRESS, true);
+    myOled = new MyOled(&Wire, OLED_RESET, SCREEN_HEIGHT, SCREEN_WIDTH);
+    myOled->init(OLED_I2C_ADDRESS, true);
 
-   myOledViewWifiAp = new MyOledViewWifiAp();
-   myOledViewInitialisation = new MyOledViewInitialisation();
+    myOledViewWifiAp = new MyOledViewWifiAp();
+    myOledViewInitialisation = new MyOledViewInitialisation();
 
     myOledViewInitialisation->setNomDuSysteme("SAC System");
     myOledViewInitialisation->setIdDuSysteme("1234");
@@ -276,9 +278,7 @@ void setup()
 
     myOled->displayView(myOledViewInitialisation);
 
-
    // ------------------ Gestion boutons ----------------------
-
     myButtonAction = new MyButton();        //Pour lire le bouton actions
     myButtonAction->init(T8);
     int sensibilisationButtonAction = myButtonAction->autoSensibilisation();
@@ -287,8 +287,8 @@ void setup()
     myButtonReset->init(T9);
     int sensibilisationButtonReset = myButtonReset->autoSensibilisation();
 
-   Serial.print("sensibilisationButtonAction : "); Serial.println(sensibilisationButtonAction);
-   Serial.print("sensibilisationButtonReset : "); Serial.println(sensibilisationButtonReset);
+    Serial.print("sensibilisationButtonAction : "); Serial.println(sensibilisationButtonAction);
+    Serial.print("sensibilisationButtonReset : "); Serial.println(sensibilisationButtonReset);
 
     myOledViewInitialisation->setSensibiliteBoutonAction(String(sensibilisationButtonAction).c_str());
     myOledViewInitialisation->setSensibiliteBoutonReset(String(sensibilisationButtonReset).c_str());
@@ -296,8 +296,7 @@ void setup()
     myOled->displayView(myOledViewInitialisation);
 
    
-// ------------------- Gestion du Wifi Manager ------------------------------------------
-
+    // ------------------- Gestion du Wifi Manager ------------------------------------------
     String ssIDRandom, PASSRandom;
     String stringRandom;
     stringRandom = get_random_string(4).c_str();
@@ -307,128 +306,114 @@ void setup()
     PASSRandom = PASSWORD;
     PASSRandom = PASSRandom + stringRandom;
 
-char strToPrint[128];
+    char strToPrint[128];
     sprintf(strToPrint, "Identification : %s   MotDePasse: %s", ssIDRandom, PASSRandom);
     Serial.println(strToPrint);
 
 
- if (!wm.autoConnect(ssIDRandom.c_str(), PASSRandom.c_str())){
+    if (!wm.autoConnect(ssIDRandom.c_str(), PASSRandom.c_str()))
+    {
         Serial.println("Erreur de connexion.");
-      
-        }
+    }
     else 
     {
         Serial.println("Connexion Établie:");
         delay(1000);
-    };
+    }
         
     myOledViewWifiAp->setNomDuSysteme("SAC System");
     myOledViewWifiAp->setSsIDDuSysteme(ssIDRandom.c_str());
     myOledViewWifiAp->setPassDuSysteme(PASSRandom.c_str());
 
-     myOled->displayView(myOledViewWifiAp);
+    myOled->displayView(myOledViewWifiAp);
 
     // ----------- Initialisation des LED statuts ----------------
+    pinMode(GPIO_PIN_LED_YELLOW, OUTPUT);
+    pinMode(GPIO_PIN_LED_GREEN, OUTPUT);
+    pinMode(GPIO_PIN_LED_RED , OUTPUT);
 
-    pinMode(GPIO_PIN_LED_HEAT_BLEU, OUTPUT);
-    pinMode(GPIO_PIN_LED_HEAT_ROUGE, OUTPUT);
-    pinMode(GPIO_PIN_LED_HEAT_VERT , OUTPUT);
-
-// ----------- Clignotement des led au démarrage du système----------------
-
-    for(int i = 0; i < 2; i++){
-    digitalWrite(GPIO_PIN_LED_HEAT_ROUGE,HIGH);
-    digitalWrite(GPIO_PIN_LED_HEAT_VERT,HIGH);
-    digitalWrite(GPIO_PIN_LED_HEAT_BLEU,HIGH);
-    delay(1000);
-    digitalWrite(GPIO_PIN_LED_HEAT_ROUGE,LOW);
-    digitalWrite(GPIO_PIN_LED_HEAT_VERT,LOW);
-    digitalWrite(GPIO_PIN_LED_HEAT_BLEU,LOW);
-    delay(1000);
+    // ----------- Clignotement des led au démarrage du système----------------
+    for (int i = 0; i < 2; i++)
+    {
+        digitalWrite(GPIO_PIN_LED_RED,HIGH);
+        digitalWrite(GPIO_PIN_LED_GREEN,HIGH);
+        digitalWrite(GPIO_PIN_LED_YELLOW,HIGH);
+        delay(1000);
+        digitalWrite(GPIO_PIN_LED_RED,LOW);
+        digitalWrite(GPIO_PIN_LED_GREEN,LOW);
+        digitalWrite(GPIO_PIN_LED_YELLOW,LOW);
+        delay(1000);
     }
 
-    digitalWrite(GPIO_PIN_LED_HEAT_ROUGE,HIGH);
-    digitalWrite(GPIO_PIN_LED_HEAT_VERT,HIGH);
-    digitalWrite(GPIO_PIN_LED_HEAT_BLEU,HIGH);
-
+    digitalWrite(GPIO_PIN_LED_RED,HIGH);
+    digitalWrite(GPIO_PIN_LED_GREEN,HIGH);
+    digitalWrite(GPIO_PIN_LED_YELLOW,HIGH);
 
     // ----------- Routes du serveur ----------------
-
     myServer = new MyServer(80);
     myServer->initAllRoutes();
     myServer->initCallback(&CallBackMessageListener);
 
     // ----------- Senseur de température ----------------
-
     temperatureStub = new TemperatureStub();
     temperatureStub->init(DHTPIN, DHTTYPE);
-
- }
-
-void loop() {
-
-
-
-// -----------Gestion du bouton Action-----------
-
-    int buttonAction = myButtonAction->checkMyButton();
-    if (buttonAction > 1)
-    { // Si appuyé plus de 0.1 secondes
-        Serial.println("action");
-    }
-
-    // -----------Gestion du bouton Reset-----------
-
-    int buttonReset = myButtonReset->checkMyButton();
-    if (buttonReset > 2)
-    { // Si appuyé plus de 0.1 secondes
-        Serial.println("reset");
-        ESP.restart();
-    }
-// ----------- Gestion du display, température-----------
-
-    float temperatureTMP = temperatureStub->getTemperature();
-
-    
-    delay(1000);
-
-
-    if (status == "off")
+}
+ 
+void loop()
+{
+    if (timer % 1000 == 0)
     {
-       
-
-        digitalWrite(GPIO_PIN_LED_HEAT_VERT, LOW);
-        digitalWrite(GPIO_PIN_LED_HEAT_ROUGE, HIGH);
-        digitalWrite(GPIO_PIN_LED_HEAT_BLEU, LOW);
-        digitalWrite(GPIO_PIN_LED_HEAT_VERT, LOW);
-        delay(70);
-        myOledViewWorkingHEAT = new MyOledViewWorkingHEAT();
-        myOledViewWorkingHEAT->setParams("nomDuSysteme", nomSysteme);
-        myOledViewWorkingHEAT->setParams("idDuSysteme", idDuSysteme);
-        myOledViewWorkingHEAT->setParams("temperature", strTemperature);
-        myOledViewWorkingHEAT->setParams("ipDuSysteme",WiFi.localIP().toString().c_str());
-        myOled->displayView(myOledViewWorkingHEAT);
-    }
-    else if (status == "Cold")
-    {
-        
-        digitalWrite(GPIO_PIN_LED_HEAT_ROUGE, LOW);
-        digitalWrite(GPIO_PIN_LED_HEAT_BLEU, HIGH);
-        digitalWrite(GPIO_PIN_LED_HEAT_VERT, LOW);
-
-    }
-    else if (status == "Heat")
-        {
-            digitalWrite(GPIO_PIN_LED_HEAT_ROUGE, LOW);
-            digitalWrite(GPIO_PIN_LED_HEAT_BLEU, LOW);
-            digitalWrite(GPIO_PIN_LED_HEAT_VERT, HIGH);
-            delay(1000);
-
-        
-            // quand le chauffage est terminé, le four doit s'arreter
+        // -----------Gestion du bouton Action-----------
+        int buttonAction = myButtonAction->checkMyButton();
+        if (buttonAction > 1)
+        { // Si appuyé plus de 0.1 secondes
+            Serial.println("action");
         }
 
-  }
+        // -----------Gestion du bouton Reset-----------
+        int buttonReset = myButtonReset->checkMyButton();
+        if (buttonReset > 2)
+        { // Si appuyé plus de 0.1 secondes
+            Serial.println("reset"); 
+            ESP.restart();
+        }
 
-    // delay(1000);
-// }
+        // ----------- Gestion du display, température-----------
+        float temperatureTMP = temperatureStub->getTemperature();
+
+        if (status == "Off" && !redLedIsOn)
+        {
+            redLedIsOn = true;
+            yellowLedIsOn = false;
+            greenLedIsOn = false;
+            digitalWrite(GPIO_PIN_LED_GREEN, LOW);
+            digitalWrite(GPIO_PIN_LED_YELLOW, LOW);
+            digitalWrite(GPIO_PIN_LED_RED, HIGH);
+            displayStateOled();
+        }
+        if (status == "Heat" && !yellowLedIsOn)
+        {
+            yellowLedIsOn = true;
+            redLedIsOn = false;
+            greenLedIsOn = false;
+            digitalWrite(GPIO_PIN_LED_GREEN, LOW);
+            digitalWrite(GPIO_PIN_LED_YELLOW, HIGH);
+            digitalWrite(GPIO_PIN_LED_RED, LOW);
+            displayStateOled();
+        }
+        if (status == "Cold" && !greenLedIsOn)
+        {
+            greenLedIsOn = true;
+            yellowLedIsOn = false;
+            redLedIsOn = false;
+            digitalWrite(GPIO_PIN_LED_GREEN, HIGH);
+            digitalWrite(GPIO_PIN_LED_YELLOW, LOW);
+            digitalWrite(GPIO_PIN_LED_RED, LOW);
+            displayStateOled();
+        }
+
+        Serial.println("Passage dans le loop");
+        Serial.println("Status actuel : " + String(status.c_str()));
+    }
+    timer += 10;
+    delay(10);

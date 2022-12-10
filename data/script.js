@@ -2,23 +2,20 @@
  * Fichier: script.js
  * Description: Fichier Javascript du projet
  * Date: 18/11/22
- * Auteur: Samuel GASSAMA
+ * Auteur: David Tremblay et Samuel Gassama
  * version : 1.6
  * ---------------------------------------------------
  */
 
-
-
 var boisChoisi;
 var temperature;
 
-
 // --------------------- Fonction GET qui permet d'afficher la liste des bois dans le select -----------
-
+window.addEventListener("load", getAllWoodOptions());
 window.addEventListener("load", setEtatFour("Off"));
 window.addEventListener("load", getNomFour());
 window.addEventListener("load", getFromEsp_TemperatureSensor());
-window.addEventListener("load", getAllWoodOptions());
+
 function getAllWoodOptions()
 {
     var xhttp = new XMLHttpRequest();
@@ -46,9 +43,14 @@ function getAllWoodOptions()
     xhttp.open("GET", "getAllWoodOptions", true);
     xhttp.send();
 }
-//-------------------Fonction getTemperatureSensor---------------------
 
-setInterval(function getFromEsp_TemperatureSensor()
+//-------------------Fonction getTemperatureSensor---------------------
+setInterval(function()
+{
+    getFromEsp_TemperatureSensor();
+}, 2000);
+
+function getFromEsp_TemperatureSensor()
 {
     var xhttp = new XMLHttpRequest();
    
@@ -62,26 +64,25 @@ setInterval(function getFromEsp_TemperatureSensor()
     };
     xhttp.open("GET", "getTemperatureSensor", true);
     xhttp.send();
-}, 3000);
+}
 
-    // ------------------ Demande le nom du système afin de l’afficher dans la vue HTML ----------------
-
-    function getFromESP_getNom () {
-        var xhttp = new XMLHttpRequest();
-        xhttp.onreadystatechange = function () {
-        if (this.readyState == 4 && this.status == 200) {
-        document.getElementById("nom").innerHTML = this.responseText;
+// Demande le nom du système afin de l’afficher dans la vue HTML
+function getNomFour()
+{
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function ()
+    {
+        if (this.readyState == 4 && this.status == 200)
+        {
+            document.getElementById("nomFour").innerHTML = this.responseText;
         }
-        };
-        xhttp.open("GET", "getNomEsp", true);
-        xhttp.send();
-       }
+    };
+    xhttp.open("GET", "getNomFour", true);
+    xhttp.send();
+}
 
-
-       // Fonction récupérer les infos de l'API Bois
 
 // --------------------- Fonction GET qui permet d'afficher les caractéristiques du bois -----------
-
 function getFromESP_getWoodCaracteristique()
 {
     var xhttp = new XMLHttpRequest();
@@ -117,6 +118,7 @@ function getFromESP_getWoodCaracteristique()
             }
             document.getElementById("caracteristiquesBois").style.display = "block";
             document.getElementById("cercleStatut").style.backgroundColor = "red";
+            setEtatFour("Off");
         }
     };
 
@@ -179,8 +181,7 @@ function demarrageFour()
     }
 
 };
-// ----------------- Fonction setInterval pour recuperer le status du four  ----------------------
-
+// ----------------- Fonction pour set le status du four actuel dans le main ----------------------
 function setEtatFour(etat) {
     var xhttp = new XMLHttpRequest();
     xhttp.open("GET", "setEtatFour?etat=" + etat, true);    

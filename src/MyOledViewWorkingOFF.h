@@ -1,7 +1,7 @@
 /**
     Class MyOledViewWorkingOFF : Gestion d'une VUE pour le OLed
     @file MyOledViewWorkingOFF.h 
-    @author Samuel GASSAMA
+    @author David Tremblay et Samuel Gassama
     @version 1.1 24/11/22 
     
     Historique des versions   
