@@ -32,7 +32,9 @@ Librairies utilisées :
 Remarques: 
 
 
-Pour trouver le WifiManager (dans la branche development) https://github.com/tzapu/WiFiManager/tree/development Ne pas oublier d'appuyez sur l'ampoule et choisir : ajouter Lib /lib/DHT/DHT.cpp Pour obtenir la température float getTemperature()
+Pour trouver le WifiManager (dans la branche development) https://github.com/tzapu/WiFiManager/tree/development 
+
+Ne pas oublier d'appuyez sur l'ampoule et choisir : ajouter Lib /lib/DHT/DHT.cpp Pour obtenir la température float getTemperature()
 
 -- Fonctions utiles (utilitaires) /lib/MYLIB/myFunctions.cpp 
 
