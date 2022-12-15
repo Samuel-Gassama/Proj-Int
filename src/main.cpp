@@ -121,7 +121,7 @@ WiFiServer server(80);
 #define DHTPIN  15   // Pin utilisée par le senseur DHT11 / DHT22
 #define DHTTYPE DHT22  //Le type de senseur utilisé (mais ce serait mieux d'avoir des DHT22 pour plus de précision)
 TemperatureStub *temperatureStub = NULL;
-float temperature;
+float  temperature = temperatureStub->getTemperature();
 int currentTemperatureDisplayed = 0;
 char strTemperature[128];
 float temperatureActuelle = 0.0;
